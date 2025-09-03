@@ -93,6 +93,17 @@ export function EmbedAll({ articleSlug, initialCalculator }: EmbedAllProps) {
       setFadeClass('opacity-100')
     }, 300)
   }
+
+  const handleNavigateToCalculator = (calculatorId: string) => {
+    console.log('[DEBUG] Navegando para calculadora via home:', calculatorId)
+    setFadeClass('opacity-0')
+    setTimeout(() => {
+      setSelectedCalculator(calculatorId as CalculatorType)
+      // Garantir que não mantém estados anteriores - force refresh
+      setCameFromCarousel(false)
+      setFadeClass('opacity-100')
+    }, 150)
+  }
   
   const goToSlide = (index: number) => {
     setCurrentSlide(index)
@@ -112,33 +123,39 @@ export function EmbedAll({ articleSlug, initialCalculator }: EmbedAllProps) {
         <div className="min-h-[500px] flex items-start justify-center">
           {selectedCalculator === 'ferias' && (
             <Ferias
+              key="ferias-calculator"
               onCalculate={handleCalculate}
               onStart={handleStart}
               variant="ferias-all"
               articleSlug={articleSlug}
               showBackButton={cameFromCarousel}
               onBack={handleBackToCarousel}
+              onNavigateToCalculator={handleNavigateToCalculator}
             />
           )}
 
           {selectedCalculator === 'custo-funcionario' && (
             <CustoFuncionario
+              key="custo-funcionario-calculator"
               onCalculate={handleCalculate}
               onStart={handleStart}
               variant="custo-funcionario-all"
               articleSlug={articleSlug}
               showBackButton={cameFromCarousel}
               onBack={handleBackToCarousel}
+              onNavigateToCalculator={handleNavigateToCalculator}
             />
           )}
           {selectedCalculator === '13o-salario' && (
             <DecimoTerceiro
+              key="13o-salario-calculator"
               onCalculate={handleCalculate}
               onStart={handleStart}
               variant="13o-salario-all"
               articleSlug={articleSlug}
               showBackButton={cameFromCarousel}
               onBack={handleBackToCarousel}
+              onNavigateToCalculator={handleNavigateToCalculator}
             />
           )}
         </div>

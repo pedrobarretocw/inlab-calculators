@@ -3,7 +3,7 @@ import { auth, clerkClient } from '@clerk/nextjs/server'
 // VERIFICAÇÃO SIMPLES: usuário admin válido
 export async function isRealAdminUser(): Promise<boolean> {
   try {
-    const { userId, sessionClaims } = auth()
+    const { userId, sessionClaims } = await auth()
     if (!userId || !sessionClaims) {
       console.log('[Auth Check] No userId or sessionClaims')
       return false

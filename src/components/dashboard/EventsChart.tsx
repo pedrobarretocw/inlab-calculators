@@ -39,6 +39,13 @@ export function EventsChart() {
       if (response.ok) {
         const eventData = await response.json()
         
+        // Check if API returned an error object
+        if (eventData.error) {
+          console.log('[EventsChart] API returned error:', eventData.error)
+          setData(dates) // Use mock data
+          return
+        }
+        
         // Merge real data with date structure
         const chartData = dates.map(day => {
           const dayData = eventData.find((d: any) => d.date === day.date)

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { RotateCcw, Calculator, Save, Mail, ArrowLeft, Sparkles, CheckCircle, History } from 'lucide-react'
+import { RotateCcw, Calculator, Save, Mail, ArrowLeft, Sparkles, CheckCircle, History, Home } from 'lucide-react'
 import { toast } from 'sonner'
 import { PublicClerkProvider } from '@/components/auth/PublicClerkProvider'
 import { usePublicAuth } from '@/hooks/usePublicAuth'
@@ -22,6 +22,7 @@ interface CalculationResultProps {
   calculatorType?: string
   calculationData?: Record<string, any>
   onShowSavedCalculations?: () => void
+  onShowCalculatorHome?: () => void
   isFromSavedCalculation?: boolean
   savedCalculationType?: string // Tipo real do cálculo salvo (se diferente do atual)
 }
@@ -57,6 +58,7 @@ function CalculationResultContent({
   calculatorType, 
   calculationData,
   onShowSavedCalculations,
+  onShowCalculatorHome,
   isFromSavedCalculation = false,
   savedCalculationType
 }: CalculationResultProps) {
@@ -425,20 +427,43 @@ function CalculationResultContent({
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1)'
         }}
       >
-        <CardContent className="p-3 flex-1 flex flex-col justify-between h-full">
-          {/* Header sutil com tipo de cálculo */}
-          {isFromSavedCalculation && savedCalculationType && (
-            <div className="mb-2 pb-2 border-b border-gray-200/40">
-              <div className="flex items-center justify-center gap-1.5">
-                <span className="text-lg">
-                  {getCalculationTypeIcon(savedCalculationType)}
-                </span>
-                <span className="text-xs font-medium text-gray-600 tracking-wide">
-                  {getCalculationTypeName(savedCalculationType)}
-                </span>
-              </div>
-            </div>
+        {/* Header com seta voltar */}
+        <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60 relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onShowSavedCalculations && onShowSavedCalculations()}
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          
+          {onShowCalculatorHome && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onShowCalculatorHome()}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <Home className="h-4 w-4 text-gray-600" />
+            </Button>
           )}
+          
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center justify-center gap-2">
+            <span className="text-xl">
+              {isFromSavedCalculation && savedCalculationType 
+                ? getCalculationTypeIcon(savedCalculationType)
+                : '📊'
+              }
+            </span>
+            {isFromSavedCalculation && savedCalculationType 
+              ? getCalculationTypeName(savedCalculationType)
+              : title
+            }
+          </h2>
+        </div>
+
+        <CardContent className="p-3 flex-1 flex flex-col justify-between h-full">
           
           {/* Results - Com scroll se necessário */}
           <div className="space-y-1.5 flex-1 overflow-y-auto">
@@ -475,7 +500,7 @@ function CalculationResultContent({
           {/* Actions - Fixo na parte inferior */}
           <div className="pt-2 border-t border-gray-200/50 space-y-1.5 flex-shrink-0">
             {/* Buttons layout responsivo */}
-            {!isFromSavedCalculation ? (
+            {!isFromSavedCalculation && (
               // Botões normais (cálculo novo)
               user && isLoaded ? (
                 // 3 botões quando logado - grid responsivo
@@ -529,18 +554,6 @@ function CalculationResultContent({
                   </Button>
                 </div>
               )
-            ) : (
-              // Apenas botão de voltar para cálculos salvos
-              <div className="flex justify-center">
-                <Button 
-                  onClick={() => onShowSavedCalculations && onShowSavedCalculations()}
-                  variant="outline"
-                  className="w-full max-w-64 h-10 border-blue-200 bg-blue-50/50 backdrop-blur-sm hover:bg-blue-100/80 hover:border-blue-300 transition-all flex items-center gap-2 text-sm text-blue-700"
-                >
-                  <ArrowLeft className="h-3 w-3" />
-                  Voltar aos Cálculos
-                </Button>
-              </div>
             )}
           </div>
         </CardContent>

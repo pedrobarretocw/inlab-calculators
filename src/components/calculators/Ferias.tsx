@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { InfoIcon, Calendar, Clock, ArrowLeft } from 'lucide-react'
+import { InfoIcon, Calendar, Clock, ArrowLeft, Home } from 'lucide-react'
 import { CalculationResult } from './CalculationResult'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { NumberInput } from '@/components/ui/number-input'
@@ -24,6 +24,7 @@ import { ViewSavedCalculationsButton } from './ViewSavedCalculationsButton'
 import { SavedCalculationsView } from './SavedCalculationsView'
 import { useCalculationResult } from '@/hooks/useCalculationResult'
 import { CalculationParser } from '@/lib/calculation-parser'
+import { CalculatorHome } from './CalculatorHome'
 
 interface FeriasProps {
   onCalculate?: (result: FeriasResult) => void
@@ -32,12 +33,14 @@ interface FeriasProps {
   articleSlug?: string
   showBackButton?: boolean
   onBack?: () => void
+  onNavigateToCalculator?: (calculatorId: string) => void
 }
 
-export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, showBackButton, onBack }: FeriasProps) {
+export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, showBackButton, onBack, onNavigateToCalculator }: FeriasProps) {
   const [hasStarted, setHasStarted] = useState(false)
   const [showSavedCalculations, setShowSavedCalculations] = useState(false)
   const [showEmailCapture, setShowEmailCapture] = useState(false)
+  const [showCalculatorHome, setShowCalculatorHome] = useState(false)
   
   // Hook limpo para gerenciar resultados
   const calculationResult = useCalculationResult('ferias')
@@ -118,6 +121,35 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
 
 
 
+  // Mostrar home de calculadoras
+  if (showCalculatorHome) {
+    return (
+      <TooltipProvider>
+        <div className="relative w-full max-w-lg">
+          <Card className="w-full h-[500px] shadow-lg border border-gray-400 rounded-2xl overflow-hidden" style={{ backgroundColor: '#F5F5F5' }}>
+            <CalculatorHome
+              onSelectCalculator={(calculatorId) => {
+                console.log('[DEBUG] Navegando para calculadora:', calculatorId)
+                if (calculatorId === 'ferias') {
+                  // Se selecionar férias, fecha home e meus calculos, volta pra tela principal
+                  setShowCalculatorHome(false)
+                  setShowSavedCalculations(false)
+                  calculationResult.reset()
+                } else if (onNavigateToCalculator) {
+                  // Se for outra calculadora, navega diretamente
+                  onNavigateToCalculator(calculatorId)
+                } else {
+                  // Fallback: apenas fecha o home se não houver callback
+                  setShowCalculatorHome(false)
+                }
+              }}
+            />
+          </Card>
+        </div>
+      </TooltipProvider>
+    )
+  }
+
   // Mostrar cálculos salvos
   if (showSavedCalculations) {
     return (
@@ -126,7 +158,18 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
           <Card className="w-full h-[500px] shadow-lg border border-gray-400 rounded-2xl overflow-hidden" style={{ backgroundColor: '#F5F5F5' }}>
             <SavedCalculationsView 
 
-              onBack={() => setShowSavedCalculations(false)}
+              onBack={() => {
+                // Resetar tudo e ir para tela de novo cálculo
+                calculationResult.reset()
+                form.reset()
+                setShowSavedCalculations(false)
+              }}
+              onShowCalculatorHome={() => {
+                // Fecha meus calculos primeiro
+                setShowSavedCalculations(false)
+                // Depois mostra o home
+                setShowCalculatorHome(true)
+              }}
               onSelectCalculation={(calc) => {
                 console.log('[DEBUG] Cálculo selecionado:', calc)
                 console.log('[DEBUG] Inputs:', calc.inputs)
@@ -288,16 +331,11 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
           <CardHeader className="pb-3 px-6 pt-3">
             <CardTitle className="text-lg font-medium text-gray-900 flex items-center justify-center gap-2">
               <span>🏖️</span>
-              Férias
-              <Tooltip>
-                <TooltipTrigger>
-                  <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Cálculo de férias e adicional de 1/3</p>
-                </TooltipContent>
-              </Tooltip>
+              Calculadora de Férias
             </CardTitle>
+            <CardDescription className="text-center text-sm text-gray-600 mt-2">
+              Calcule suas férias de forma rápida e fácil
+            </CardDescription>
           </CardHeader>
           
           <CardContent className="px-6 pb-6 pt-2">
@@ -305,8 +343,19 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
               <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-8">
                 {/* Campo de Salário - Minimalista */}
                 <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">Salário Mensal</span>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="h-3 w-3 text-gray-400 hover:text-gray-600 transition-colors" />
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-white text-black border border-gray-200 shadow-lg max-w-48" sideOffset={5}>
+                        <p>Seu salário bruto mensal</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                   <CurrencyInput
-                    label="Salário Mensal"
+                    label=""
                     placeholder="R$ 0,00"
                     value={form.watch('salarioMensal') || 0}
                     onChange={(value) => {
@@ -319,55 +368,89 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
 
                 {/* Campos em Grid - Espaçamento compacto */}
                 <div className="grid grid-cols-2 gap-4">
-                  <NumberInput
-                    label="📅 Meses Trabalhados"
-                    placeholder="12"
-                    value={form.watch('mesesTrabalhados')}
-                    onChange={(value) => {
-                      form.setValue('mesesTrabalhados', value)
-                      handleInputChange()
-                    }}
-                    onInputChange={handleInputChange}
-                    min={1}
-                    max={12}
-                    icon={Calendar}
-                    iconColor="text-blue-500"
-                  />
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-700">📅 Meses Trabalhados</span>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <InfoIcon className="h-3 w-3 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-white text-black border border-gray-200 shadow-lg max-w-48" sideOffset={5}>
+                          <p>Meses que você trabalhou neste período</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <NumberInput
+                      label=""
+                      placeholder="12"
+                      value={form.watch('mesesTrabalhados')}
+                      onChange={(value) => {
+                        form.setValue('mesesTrabalhados', value)
+                        handleInputChange()
+                      }}
+                      onInputChange={handleInputChange}
+                      min={1}
+                      max={12}
+                      icon={Calendar}
+                      iconColor="text-blue-500"
+                    />
+                  </div>
 
-                  <NumberInput
-                    label="Dias de Férias"
-                    placeholder="30"
-                    value={form.watch('diasFerias')}
-                    onChange={(value) => {
-                      form.setValue('diasFerias', value)
-                      handleInputChange()
-                    }}
-                    onInputChange={handleInputChange}
-                    min={10}
-                    max={30}
-                    icon={Clock}
-                    iconColor="text-purple-500"
-                  />
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-700">Dias de Férias</span>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <InfoIcon className="h-3 w-3 text-gray-400 hover:text-gray-600 transition-colors" />
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-white text-black border border-gray-200 shadow-lg max-w-48" sideOffset={5}>
+                          <p>Dias que você vai tirar de férias</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <NumberInput
+                      label=""
+                      placeholder="30"
+                      value={form.watch('diasFerias')}
+                      onChange={(value) => {
+                        form.setValue('diasFerias', value)
+                        handleInputChange()
+                      }}
+                      onInputChange={handleInputChange}
+                      min={10}
+                      max={30}
+                      icon={Clock}
+                      iconColor="text-purple-500"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-3 pt-2">
-                  {/* Botão de calcular */}
-                  <div className="flex justify-center">
+                  {/* Botões lado a lado */}
+                  <div className="flex gap-3 justify-center">
                     <Button 
                       type="submit" 
-                      className="px-6 py-2 text-sm font-medium text-black transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                      className="flex-1 max-w-[160px] px-4 py-2 text-sm font-medium text-black transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02]"
                       style={{ backgroundColor: '#BAFF1B' }}
                     >
                       Calcular Férias
                     </Button>
-                  </div>
-                  
-                  {/* Botão de cálculos salvos mais aparente */}
-                  <div className="flex justify-center">
+                    
                     <Button 
                       variant="outline"
                       onClick={() => setShowSavedCalculations(true)}
-                      className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
+                      className="flex-1 max-w-[160px] px-4 py-2 text-sm font-medium transition-all duration-200"
+                      style={{ 
+                        backgroundColor: '#6B7280', 
+                        borderColor: '#4B5563',
+                        color: 'white'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#4B5563'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#6B7280'
+                      }}
                     >
                       Ver Cálculos Salvos
                     </Button>
@@ -420,6 +503,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
           calculatorType="ferias"
           calculationData={form.getValues()}
           onShowSavedCalculations={() => setShowSavedCalculations(true)}
+          onShowCalculatorHome={() => setShowCalculatorHome(true)}
           isFromSavedCalculation={calculationResult.result.isFromSaved}
           savedCalculationType={calculationResult.result.savedType}
         />

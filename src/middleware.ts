@@ -23,9 +23,16 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   if (isAdminRoute(req)) {
     const { userId, sessionClaims } = await auth()
     
-    // Se não está logado, vai pro login
+    // Se não está logado
     if (!userId) {
-      console.log('[Middleware] Admin route: No userId, redirecting to login')
+      console.log('[Middleware] Admin route: No userId')
+      
+      // Se for API, retornar JSON ao invés de redirect
+      if (req.nextUrl.pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized - Please login as admin' }, { status: 401 })
+      }
+      
+      // Se for página, redirecionar para login
       return NextResponse.redirect(new URL('/calculadoras/admin/login', req.url))
     }
 
@@ -37,6 +44,12 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
       
       if (!isFromAdminInstance) {
         console.log('[Middleware] BLOCKED: User from public instance trying to access admin')
+        
+        // Se for API, retornar JSON ao invés de redirect
+        if (req.nextUrl.pathname.startsWith('/api/')) {
+          return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 })
+        }
+        
         return NextResponse.redirect(new URL('/calculadoras/admin/access-denied', req.url))
       }
 
@@ -45,6 +58,12 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
       
     } catch (error) {
       console.error('[Middleware] Error checking admin status:', error)
+      
+      // Se for API, retornar JSON ao invés de redirect
+      if (req.nextUrl.pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Authentication error' }, { status: 500 })
+      }
+      
       return NextResponse.redirect(new URL('/calculadoras/admin/login', req.url))
     }
   }

@@ -20,6 +20,7 @@ import { InlineToastContainer } from '@/components/ui/inline-toast'
 import { CalculatorErrorToastContainer } from '@/components/ui/calculator-error-toast'
 import { ViewSavedCalculationsButton } from './ViewSavedCalculationsButton'
 import { SavedCalculationsView } from './SavedCalculationsView'
+import { CalculatorHome } from './CalculatorHome'
 
 interface CustoFuncionarioProps {
   onCalculate?: (result: CustoFuncionarioResult) => void
@@ -28,13 +29,15 @@ interface CustoFuncionarioProps {
   articleSlug?: string
   showBackButton?: boolean
   onBack?: () => void
+  onNavigateToCalculator?: (calculatorId: string) => void
 }
 
-export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcionario', articleSlug, showBackButton, onBack }: CustoFuncionarioProps) {
+export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcionario', articleSlug, showBackButton, onBack, onNavigateToCalculator }: CustoFuncionarioProps) {
   const [result, setResult] = useState<CustoFuncionarioResult | null>(null)
   const [hasStarted, setHasStarted] = useState(false)
   const [showSavedCalculations, setShowSavedCalculations] = useState(false)
   const [showEmailCapture, setShowEmailCapture] = useState(false)
+  const [showCalculatorHome, setShowCalculatorHome] = useState(false)
   
   const form = useForm<CustoFuncionarioInput>({
     resolver: zodResolver(custoFuncionarioSchema),
@@ -97,6 +100,66 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
     setResult(null)
     form.reset()
     setHasStarted(false)
+  }
+
+  // Mostrar home de calculadoras
+  if (showCalculatorHome) {
+    return (
+      <TooltipProvider>
+        <div className="relative w-full max-w-lg">
+          <Card className="w-full h-[500px] shadow-lg border border-gray-400 rounded-2xl overflow-hidden" style={{ backgroundColor: '#F5F5F5' }}>
+            <CalculatorHome
+              onSelectCalculator={(calculatorId) => {
+                console.log('[DEBUG] Navegando para calculadora:', calculatorId)
+                if (calculatorId === 'custo-funcionario') {
+                  // Se selecionar custo funcionario, fecha home e meus calculos, volta pra tela principal
+                  setShowCalculatorHome(false)
+                  setShowSavedCalculations(false)
+                  setResult(null)
+                } else if (onNavigateToCalculator) {
+                  // Se for outra calculadora, navega diretamente
+                  onNavigateToCalculator(calculatorId)
+                } else {
+                  // Fallback: apenas fecha o home se não houver callback
+                  setShowCalculatorHome(false)
+                }
+              }}
+            />
+          </Card>
+        </div>
+      </TooltipProvider>
+    )
+  }
+
+  // Mostrar cálculos salvos
+  if (showSavedCalculations) {
+    return (
+      <TooltipProvider>
+        <div className="relative w-full max-w-lg">
+          <Card className="w-full h-[500px] shadow-lg border border-gray-400 rounded-2xl overflow-hidden" style={{ backgroundColor: '#F5F5F5' }}>
+            <SavedCalculationsView 
+              onBack={() => {
+                // Resetar tudo e ir para tela de novo cálculo
+                setResult(null)
+                form.reset()
+                setShowSavedCalculations(false)
+              }}
+              onShowCalculatorHome={() => {
+                // Fecha meus calculos primeiro
+                setShowSavedCalculations(false)
+                // Depois mostra o home
+                setShowCalculatorHome(true)
+              }}
+              onSelectCalculation={(calc) => {
+                console.log('[DEBUG] Cálculo selecionado:', calc)
+                // Por enquanto apenas fecha
+                setShowSavedCalculations(false)
+              }}
+            />
+          </Card>
+        </div>
+      </TooltipProvider>
+    )
   }
 
   return (
