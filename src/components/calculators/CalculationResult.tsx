@@ -9,6 +9,9 @@ import { RotateCcw, Calculator, Save, Mail, ArrowLeft, Sparkles, CheckCircle, Hi
 import { toast } from 'sonner'
 import { PublicClerkProvider } from '@/components/auth/PublicClerkProvider'
 import { usePublicAuth } from '@/hooks/usePublicAuth'
+import { useCalculator } from '@/contexts/CalculatorContext'
+// import { addEmailToActiveCampaign } from '@/lib/activecampaign' // Movido para API route
+
 
 interface CalculationResultProps {
   title: string
@@ -44,7 +47,7 @@ const getCalculationTypeIcon = (type: string) => {
     '13o-salario': '💰',
     'ferias': '🏖️',
 
-    'custo-funcionario': '📊'
+    'custo-funcionario': '👥'
   }
   return iconMap[type] || '📋'
 }
@@ -62,84 +65,123 @@ function CalculationResultContent({
   isFromSavedCalculation = false,
   savedCalculationType
 }: CalculationResultProps) {
+  const { showHome, refreshSavedCalculations, addSavedCalculation } = useCalculator()
   const [showEmailCapture, setShowEmailCapture] = useState(false)
   const [actionType, setActionType] = useState<'save' | 'reset'>('save')
   const [email, setEmail] = useState('')
-  const [step, setStep] = useState<'email' | 'verify-code' | 'success'>('email')
+  const [step, setStep] = useState<'email' | 'verify-code'>('email')
   const [verificationCode, setVerificationCode] = useState('')
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup')
+  const [calculationName, setCalculationName] = useState('')
+  const [showNameModal, setShowNameModal] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [isResending, setIsResending] = useState(false)
   
   const { user, isLoaded, isLoading, error, signInWithEmail, verifyCode } = usePublicAuth()
 
   const saveCalculation = async (currentEmail: string, currentActionType: 'save' | 'reset') => {
-    try {
-      console.log('[Frontend] Saving calculation...')
-      const payload = {
-        email: currentEmail.trim(),
-        calculatorSlug: calculatorType || 'unknown',
-        inputs: calculationData || {},
-        outputs: results.reduce((acc, result) => ({
-          ...acc,
-          [result.label]: result.value
-        }), {}),
-        sessionId: crypto.randomUUID()
-      }
-      console.log('[Frontend] Payload:', payload)
+    // Criar objeto do cálculo salvo
+    const newCalculation = {
+      id: crypto.randomUUID(),
+      calculator_slug: calculatorType || 'unknown',
+      name: calculationName.trim() || undefined,
+      inputs: calculationData || {},
+      outputs: results.reduce((acc, result) => ({
+        ...acc,
+        [result.label]: result.value
+      }), {}),
+      created_at: new Date().toISOString()
+    }
 
-      const response = await fetch('/calculadoras/api/save-calculation', {
+    // Adicionar imediatamente no contexto (usuário vê na hora)
+    addSavedCalculation(newCalculation)
+    
+    // Fechar modal e ir direto para Meus Cálculos
+    setShowEmailCapture(false)
+    setCalculationName('')
+    if (onShowSavedCalculations) {
+      onShowSavedCalculations()
+    }
+
+    // Extrair nome do email para ActiveCampaign
+    const emailParts = currentEmail.split('@')
+    const firstName = emailParts[0]?.split('.')[0] || ''
+    
+    // Salvar no banco em background (assíncrono)
+    const payload = {
+      email: currentEmail.trim(),
+      calculatorSlug: calculatorType || 'unknown',
+      name: calculationName.trim() || null,
+      inputs: calculationData || {},
+      outputs: results.reduce((acc, result) => ({
+        ...acc,
+        [result.label]: result.value
+      }), {}),
+      sessionId: crypto.randomUUID()
+    }
+
+    try {
+      // Salvar no banco
+      fetch('/calculadoras/api/save-calculation', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+      }).then(response => {
+        if (!response.ok) {
+          console.error('Erro ao salvar no banco:', response.status)
+        }
+      }).catch(error => {
+        console.error('Erro de rede ao salvar no banco:', error)
       })
 
-      console.log('[Frontend] Response status:', response.status)
-      
-      if (response.ok) {
-        const responseData = await response.json()
-        console.log('[Frontend] Success response:', responseData)
-        toast.success('Cálculo salvo com sucesso!')
-        
-        // Se o usuário não estava logado (está no fluxo de email), ir para tela de sucesso
-        if (showEmailCapture && step !== 'success') {
-          setStep('success')
+      // Adicionar ao ActiveCampaign em background via API
+      fetch('/api/add-to-activecampaign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: currentEmail.trim(),
+          firstName: firstName,
+          lastName: undefined,
+          phone: undefined
+        }),
+      }).then(async response => {
+        const result = await response.json()
+        if (result.success) {
+          console.log(`[ActiveCampaign] Email ${currentEmail} adicionado com sucesso (ID: ${result.contactId})`)
         } else {
-          // Se já estava logado, fechar modal e redirecionar direto
-          setShowEmailCapture(false)
-          if (onShowSavedCalculations) {
-            setTimeout(() => {
-              onShowSavedCalculations()
-            }, 100)
-          }
+          console.warn(`[ActiveCampaign] Falha ao adicionar email ${currentEmail}:`, result.message)
         }
-      } else {
-        const errorData = await response.text()
-        console.error('[Frontend] Error response:', response.status, errorData)
-        toast.error(`Erro ao salvar cálculo: ${response.status}`)
-      }
+      }).catch(error => {
+        console.error('[ActiveCampaign] Erro inesperado:', error)
+      })
     } catch (error) {
-      console.error('[Frontend] Fetch error:', error)
-      toast.error('Erro de rede ao salvar cálculo. Tente novamente.')
+      console.error('Erro ao iniciar salvamento:', error)
     }
   }
 
   // Não precisamos mais detectar autenticação automática
   // O redirecionamento é feito no hook após verificação do código
 
-  if (!isVisible) return null
-
+  // Funções definidas antes dos retornos condicionais
   const handleSaveClick = async () => {
     setActionType('save')
     
-    // Se já estiver logado, salvar direto
+    // Se já estiver logado, mostrar modal de nome primeiro
     if (user && isLoaded) {
-      const userEmail = user.emailAddresses?.[0]?.emailAddress || 'user@example.com'
-      await saveCalculation(userEmail, 'save')
+      setShowNameModal(true)
       return
     }
     
     setShowEmailCapture(true)
+  }
+
+  const handleSaveWithName = async () => {
+    if (user && isLoaded) {
+      const userEmail = user.emailAddresses?.[0]?.emailAddress || 'user@example.com'
+      await saveCalculation(userEmail, 'save')
+      setShowNameModal(false)
+      setCalculationName('') // Limpar o campo
+    }
   }
 
   const handleResetClick = async () => {
@@ -160,21 +202,57 @@ function CalculationResultContent({
       return
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      toast.error('Por favor, digite um email válido')
+    try {
+      console.log('[EmailSubmit] Iniciando processo de verificação')
+      const result = await signInWithEmail(email)
+      
+      if (result && result.success) {
+        console.log('[EmailSubmit] Email enviado com sucesso')
+        if (result.mode) {
+          setAuthMode(result.mode)
+        }
+        setStep('verify-code')
+        toast.success('Código de verificação enviado para seu email!')
+      } else {
+        console.error('[EmailSubmit] Erro ao enviar email:', result && result.error)
+        toast.error((result && result.error) || 'Erro ao enviar código')
+      }
+    } catch (error) {
+      console.error('[EmailSubmit] Erro na requisição:', error)
+      toast.error('Erro ao enviar código. Tente novamente.')
+    }
+  }
+
+  const handleCodeSubmit = async () => {
+    if (!verificationCode.trim()) {
+      toast.error('Por favor, digite o código de verificação')
       return
     }
 
-    const result = await signInWithEmail(email.trim())
-    
-    if (result && result.success) {
-      setAuthMode(result.mode)
-      setStep('verify-code')
-      toast.success('Código de verificação enviado para seu email!')
-    } else {
-      toast.error((result && result.error) || 'Erro ao enviar código')
+    try {
+      console.log('[CodeSubmit] Verificando código')
+      const result = await verifyCode(verificationCode.trim(), authMode)
+      
+      if (result && result.success) {
+        console.log('[CodeSubmit] Código verificado com sucesso')
+        // Sucesso - salvar e ir para Meus Cálculos
+        await saveCalculation(email, actionType)
+      } else {
+        console.error('[CodeSubmit] Erro na verificação:', result && result.error)
+        toast.error((result && result.error) || 'Código inválido')
+      }
+    } catch (error) {
+      console.error('[CodeSubmit] Erro na verificação:', error)
+      toast.error('Erro ao verificar código. Tente novamente.')
     }
+  }
+
+  const handleBackFromEmail = () => {
+    setShowEmailCapture(false)
+    setStep('email')
+    setEmail('')
+    setVerificationCode('')
+    setCalculationName('') // Limpar o nome
   }
 
   const handleVerifyCode = async () => {
@@ -183,41 +261,137 @@ function CalculationResultContent({
       return
     }
 
-    const result = await verifyCode(
-      verificationCode.trim(), 
-      authMode,
-      // Callback para salvar cálculo após autenticação
-      () => saveCalculation(email, actionType)
-    )
-    
-    if (result && result.success) {
-      // Sucesso - mostrar tela de sucesso
-      setStep('success')
-    } else {
-      toast.error((result && result.error) || 'Código inválido')
+    setIsVerifying(true)
+    try {
+      const result = await verifyCode(verificationCode.trim(), authMode)
+      
+      if (result && result.success) {
+        // Sucesso - salvar e ir para Meus Cálculos
+        await saveCalculation(email, actionType)
+      } else {
+        toast.error((result && result.error) || 'Código inválido')
+      }
+    } finally {
+      setIsVerifying(false)
+    }
+  }
+
+  const handleResendCode = async () => {
+    setIsResending(true)
+    try {
+      const result = await signInWithEmail(email)
+      
+      if (result && result.success) {
+        console.log('[ResendCode] Código reenviado com sucesso')
+        if (result.mode) {
+          setAuthMode(result.mode)
+        }
+        toast.success('Novo código enviado para seu email!')
+      } else {
+        console.error('[ResendCode] Erro ao reenviar:', result && result.error)
+        toast.error((result && result.error) || 'Erro ao reenviar código')
+      }
+    } catch (error) {
+      console.error('[ResendCode] Erro na requisição:', error)
+      toast.error('Erro ao reenviar código. Tente novamente.')
+    } finally {
+      setIsResending(false)
     }
   }
 
   const handleSkipSave = () => {
     setShowEmailCapture(false)
-    if (actionType === 'reset') {
-      onReset()
-    }
+    setCalculationName('') // Limpar o nome
   }
 
-  const handleBackFromEmail = () => {
-    setShowEmailCapture(false)
-    setEmail('')
-    setStep('email')
+  if (!isVisible) return null
+
+  // Modal de nome para usuários logados
+  if (showNameModal) {
+    return (
+      <div className="absolute inset-0 z-10 rounded-lg overflow-hidden">
+        <Card 
+          className="h-full border border-gray-200/60 shadow-none backdrop-blur-xl"
+          style={{ 
+            backgroundColor: '#F5F5F5',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1)'
+          }}
+        >
+          <CardContent className="p-6 h-full flex flex-col justify-center relative">
+            {/* Back Button */}
+            <button
+              onClick={() => setShowNameModal(false)}
+              className="absolute top-4 left-4 w-8 h-8 rounded-full bg-gray-100/80 hover:bg-gray-200/80 backdrop-blur-sm transition-all duration-200 flex items-center justify-center group"
+            >
+              <ArrowLeft className="h-4 w-4 text-gray-600 group-hover:text-gray-800" />
+            </button>
+
+            <div className="flex flex-col items-center space-y-6">
+              {/* Title */}
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-1 text-center">
+                  Salvar Cálculo
+                </h2>
+                <p className="text-gray-600 text-xs leading-relaxed px-2 text-center">
+                  Digite um nome para identificar este cálculo (opcional)
+                </p>
+              </div>
+
+              {/* Form */}
+              <div className="w-full space-y-3">
+                <div className="text-left">
+                  <Label htmlFor="name-input" className="text-xs font-medium text-gray-700">
+                    Nome do Cálculo (opcional)
+                  </Label>
+                  <Input
+                    id="name-input"
+                    type="text"
+                    value={calculationName}
+                    onChange={(e) => setCalculationName(e.target.value)}
+                    placeholder="Férias de Out 25"
+                    className="mt-1 h-10 text-center bg-white border-gray-200 focus:border-blue-300 focus:ring-blue-200 transition-all text-sm"
+                    maxLength={40}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Button
+                    onClick={handleSaveWithName}
+                    className="w-full h-10 bg-[#BAFF1B] text-black font-semibold hover:bg-[#A8E616] transition-colors flex items-center gap-2 text-sm"
+                  >
+                    <Save className="h-3 w-3" />
+                    Salvar Cálculo
+                  </Button>
+
+                  <button
+                    onClick={() => {
+                      setShowNameModal(false)
+                      setCalculationName('') // Limpar o campo ao cancelar
+                    }}
+                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors w-full"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
+
+
 
   // Tela de captura de email - Compacta para 500px
   if (showEmailCapture) {
     return (
       <div className="absolute inset-0 z-10 rounded-lg overflow-hidden">
         <Card 
-          className="h-full border border-gray-200/60 shadow-none bg-white/95 backdrop-blur-xl"
+          className="h-full border border-gray-200/60 shadow-none backdrop-blur-xl"
           style={{ 
+            backgroundColor: '#F5F5F5',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1)'
           }}
         >
@@ -241,16 +415,16 @@ function CalculationResultContent({
                 <h2 className="text-xl font-semibold text-gray-900 mb-1">
                   {step === 'email' 
                     ? (actionType === 'save' ? 'Salvar Cálculo' : 'Salvar Histórico')
-                    : 'Verifique seu Email'
+                    : 'Digite o Código'
                   }
                 </h2>
-                <p className="text-gray-600 text-xs leading-relaxed px-2">
+                <p className="text-gray-600 text-sm leading-relaxed px-2 pt-2">
                   {step === 'email' 
                     ? (actionType === 'save' 
                       ? 'Digite seu email para salvar este cálculo e acessá-lo depois'
                       : 'Salve seus dados antes de fazer um novo cálculo para não perder o histórico'
                     )
-                    : `Enviamos um link de acesso para ${email}. Clique no link do email para salvar automaticamente seu cálculo.`
+                    : `Digite o código de 6 dígitos enviado para ${email}`
                   }
                 </p>
               </div>
@@ -268,7 +442,22 @@ function CalculationResultContent({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="seu@email.com"
-                      className="mt-1 h-10 text-center bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-300 focus:ring-blue-200 transition-all text-sm"
+                      className="mt-1 h-10 text-center bg-white border-gray-200 focus:border-blue-300 focus:ring-blue-200 transition-all text-sm"
+                    />
+                  </div>
+                  
+                  <div className="text-left">
+                    <Label htmlFor="calculation-name" className="text-xs font-medium text-gray-700">
+                      Nome do Cálculo (opcional)
+                    </Label>
+                    <Input
+                      id="calculation-name"
+                      type="text"
+                      value={calculationName}
+                      onChange={(e) => setCalculationName(e.target.value)}
+                      placeholder="Férias de Out 25"
+                      className="mt-1 h-10 text-center bg-white border-gray-200 focus:border-blue-300 focus:ring-blue-200 transition-all text-sm"
+                      maxLength={40}
                     />
                   </div>
 
@@ -294,18 +483,8 @@ function CalculationResultContent({
                     </button>
                   </div>
                 </div>
-              ) : step === 'verify-code' ? (
+              ) : (
                 <div className="space-y-4">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Mail className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-800">Digite o código recebido</span>
-                    </div>
-                    <p className="text-xs text-blue-700">
-                      Enviamos um código de 6 dígitos para {email}
-                    </p>
-                  </div>
-
                   <div className="text-left">
                     <Label htmlFor="code" className="text-xs font-medium text-gray-700">
                       Código de verificação
@@ -317,36 +496,36 @@ function CalculationResultContent({
                       onChange={(e) => setVerificationCode(e.target.value)}
                       placeholder="123456"
                       maxLength={6}
-                      className="mt-1 h-10 text-center bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-300 focus:ring-blue-200 transition-all text-lg font-mono tracking-widest"
+                      className="mt-1 h-10 text-center bg-white border-gray-200 focus:border-blue-300 focus:ring-blue-200 transition-all text-lg font-mono tracking-widest"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Button
                       onClick={handleVerifyCode}
-                      disabled={isLoading}
+                      disabled={isVerifying}
                       className="w-full h-10 bg-[#BAFF1B] text-black font-semibold hover:bg-[#A8E616] transition-colors flex items-center gap-2 text-sm"
                     >
-                      {isLoading ? (
+                      {isVerifying ? (
                         <div className="w-3 h-3 border-2 border-gray-700 border-t-transparent rounded-full animate-spin" />
                       ) : (
                         <Save className="h-3 w-3" />
                       )}
-                      {isLoading ? 'Verificando...' : 'Verificar e Salvar'}
+                      {isVerifying ? 'Verificando...' : 'Verificar e Salvar'}
                     </Button>
 
                     <Button
-                      onClick={handleEmailSubmit}
-                      disabled={isLoading}
+                      onClick={handleResendCode}
+                      disabled={isResending}
                       variant="outline"
                       className="w-full h-8 border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center gap-2 text-xs"
                     >
-                      {isLoading ? (
+                      {isResending ? (
                         <div className="w-3 h-3 border-2 border-gray-700 border-t-transparent rounded-full animate-spin" />
                       ) : (
                         <Mail className="h-3 w-3" />
                       )}
-                      {isLoading ? 'Reenviando...' : 'Reenviar Código'}
+                      {isResending ? 'Reenviando...' : 'Reenviar Código'}
                     </Button>
 
                     <button
@@ -354,59 +533,6 @@ function CalculationResultContent({
                       className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
                     >
                       Tentar outro email
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                // Tela de sucesso
-                <div className="space-y-4 text-center">
-                  <div className="flex justify-center">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                      <Sparkles className="h-8 w-8 text-green-600" />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Cálculo salvo com sucesso!
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-1">
-                      Você está logado como:
-                    </p>
-                    <p className="text-sm font-medium text-gray-900">
-                      {email}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 pt-2">
-                    <Button
-                      onClick={() => {
-                        setShowEmailCapture(false)
-                        if (actionType === 'reset') {
-                          onReset()
-                        }
-                        // Redirecionar para cálculos salvos
-                        if (onShowSavedCalculations) {
-                          setTimeout(() => {
-                            onShowSavedCalculations()
-                          }, 100)
-                        }
-                      }}
-                      className="w-full h-10 bg-[#BAFF1B] text-black font-semibold hover:bg-[#A8E616] transition-colors text-sm"
-                    >
-                      Ver Meus Cálculos Salvos
-                    </Button>
-                    
-                    <button
-                      onClick={() => {
-                        setShowEmailCapture(false)
-                        if (actionType === 'reset') {
-                          onReset()
-                        }
-                      }}
-                      className="text-xs text-gray-600 hover:text-gray-800 transition-colors block w-full"
-                    >
-                      {actionType === 'reset' ? 'Fazer Novo Cálculo' : 'Continuar aqui'}
                     </button>
                   </div>
                 </div>
@@ -422,13 +548,14 @@ function CalculationResultContent({
   return (
     <div className="absolute inset-0 z-10 rounded-lg overflow-hidden">
       <Card 
-        className="h-full border border-gray-200/60 shadow-none bg-white/95 backdrop-blur-xl"
+        className="h-full border border-gray-200/60 shadow-none backdrop-blur-xl"
         style={{ 
+          backgroundColor: '#F5F5F5',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1)'
         }}
       >
         {/* Header com seta voltar */}
-        <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60 relative">
+        <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200/60 relative">
           <Button
             variant="ghost"
             size="sm"
@@ -438,16 +565,17 @@ function CalculationResultContent({
             <ArrowLeft className="h-4 w-4" />
           </Button>
           
-          {onShowCalculatorHome && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onShowCalculatorHome()}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <Home className="h-4 w-4 text-gray-600" />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              console.log('[CalculationResult] Home button clicked')
+              showHome()
+            }}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <Home className="h-4 w-4 text-gray-600" />
+          </Button>
           
           <h2 className="text-lg font-semibold text-gray-900 flex items-center justify-center gap-2">
             <span className="text-xl">
@@ -463,17 +591,17 @@ function CalculationResultContent({
           </h2>
         </div>
 
-        <CardContent className="p-3 flex-1 flex flex-col justify-between h-full">
+        <CardContent className="p-2 flex-1 flex flex-col justify-between h-full">
           
           {/* Results - Com scroll se necessário */}
-          <div className="space-y-1.5 flex-1 overflow-y-auto">
+          <div className="space-y-1 flex-1 overflow-y-auto">
             {results.map((result, index) => (
               <div 
                 key={index} 
                 className={`flex justify-between items-center p-2 rounded-lg backdrop-blur-sm transition-all border ${
                   result.highlight 
                     ? 'bg-gradient-to-r from-green-50/80 to-emerald-50/80 border-green-200/60 shadow-sm' 
-                    : 'bg-gray-50/60 border-gray-200/50'
+                    : 'bg-white border-gray-200/50'
                 }`}
               >
                 <span className={`font-medium text-sm ${
@@ -491,14 +619,14 @@ function CalculationResultContent({
               </div>
             ))}
             
-            {/* Disclaimer no final dos resultados */}
-            <p className="text-xs text-gray-500 text-center pt-4 border-t border-gray-200/30">
+            {/* Disclaimer no final dos resultados - SEM LINHA */}
+            <p className="text-xs text-gray-500 text-center pt-4">
               Lembre-se: estes valores são estimativas para te orientar
             </p>
           </div>
           
           {/* Actions - Fixo na parte inferior */}
-          <div className="pt-2 border-t border-gray-200/50 space-y-1.5 flex-shrink-0">
+          <div className="pt-2 space-y-1.5 flex-shrink-0">
             {/* Buttons layout responsivo */}
             {!isFromSavedCalculation && (
               // Botões normais (cálculo novo)

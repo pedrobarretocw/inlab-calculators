@@ -22,34 +22,34 @@ const calculatorOptions: CalculatorOption[] = [
     name: 'Férias',
     description: 'Calcule o valor das suas férias',
     emoji: '🏖️',
-    gradient: 'from-emerald-400 to-teal-500'
+    gradient: 'from-purple-400 to-purple-600'
   },
   {
     id: '13o-salario',
     name: '13º Salário',
     description: 'Calcule seu décimo terceiro',
     emoji: '💰',
-    gradient: 'from-blue-400 to-indigo-500'
+    gradient: 'from-purple-400 to-purple-600'
   },
   {
     id: 'custo-funcionario',
     name: 'Custo do Funcionário',
     description: 'Calcule o custo total',
     emoji: '👥',
-    gradient: 'from-amber-400 to-orange-500'
+    gradient: 'from-purple-400 to-purple-600'
   }
 ]
 
 export function CalculatorHome({ onSelectCalculator }: CalculatorHomeProps) {
+  console.log('[CalculatorHome] Componente renderizado!')
   return (
     <div 
-      className="h-[500px] flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-500" 
-      style={{ backgroundColor: '#F5F5F5' }}
+      className="quiz-snake-border h-[480px] flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-500 rounded-lg"
     >
       {/* Header */}
       <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60">
         <h2 className="text-lg font-semibold text-gray-900 flex items-center justify-center gap-2">
-          <Calculator className="h-5 w-5 text-blue-600" />
+          <Calculator className="h-5 w-5 text-purple-600" />
           Calculadoras InfinitePay
         </h2>
       </div>
@@ -60,7 +60,10 @@ export function CalculatorHome({ onSelectCalculator }: CalculatorHomeProps) {
           {calculatorOptions.map((calc, index) => (
             <button
               key={calc.id}
-              onClick={() => onSelectCalculator(calc.id)}
+              onClick={() => {
+                console.log('[DEBUG] CalculatorHome - Clicando em:', calc.id, calc.name)
+                onSelectCalculator(calc.id)
+              }}
               className="w-full group animate-in fade-in-0 slide-in-from-bottom-2"
               style={{ 
                 animationDelay: `${index * 100}ms`,

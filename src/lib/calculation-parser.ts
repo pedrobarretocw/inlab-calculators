@@ -14,13 +14,12 @@ export class CalculationParser {
     if (typeof value === 'number') return isNaN(value) ? 0 : value
     
     if (typeof value === 'string') {
+      // Detectar se é negativo (- no início ou "- R$")
+      const isNegative = value.startsWith('-') || value.startsWith('- ')
+      
       if (value.includes('R$')) {
-        let cleaned = value.replace(/R\$\s?/g, '').trim()
-        
-        const isNegative = cleaned.startsWith('-') || value.startsWith('-')
-        if (isNegative) {
-          cleaned = cleaned.replace(/^-\s*/, '')
-        }
+        // Limpar tudo: "- ", "R$", etc.
+        let cleaned = value.replace(/^-\s*/, '').replace(/R\$\s?/g, '').trim()
         
         if (cleaned.includes('.') && cleaned.includes(',')) {
           cleaned = cleaned.replace(/\./g, '').replace(',', '.')
@@ -60,6 +59,11 @@ export class CalculationParser {
   static parseDecimoTerceiro(calc: SavedCalculation) {
     const { inputs, outputs } = calc
     
+    // Debug para ver o que está chegando
+    console.log('[CalculationParser] parseDecimoTerceiro - outputs:', outputs)
+    console.log('[CalculationParser] INSS bruto:', outputs['INSS estimado'])
+    console.log('[CalculationParser] INSS parseado:', this.parseValue(outputs['INSS estimado']))
+    
     return {
       valorProporcional: this.parseValue(outputs['Valor Proporcional']),
       primeiraParcela: this.parseValue(outputs['1ª Parcela (até 30/11)']),
@@ -75,6 +79,31 @@ export class CalculationParser {
     }
   }
 
+  static parseCustoFuncionario(calc: SavedCalculation) {
+    const { inputs, outputs } = calc
+    
+    // Debug para ver o que está chegando
+    console.log('[CalculationParser] parseCustoFuncionario - outputs:', outputs)
+    
+    return {
+      salarioBase: this.parseValue(outputs['Salário Base']),
+      decimoTerceiro: this.parseValue(outputs['13º Salário (prop.)']),
+      ferias: this.parseValue(outputs['Férias + 1/3 (prop.)']),
+      fgts: this.parseValue(outputs['FGTS (8%)']),
+      encargos: this.parseValue(outputs['Encargos Sociais']),
+      beneficios: {
+        total: this.parseValue(outputs['Benefícios']),
+        valeRefeicao: inputs?.valeRefeicao || 0,
+        valeTransporte: inputs?.valeTransporte || 0,
+        planoSaude: inputs?.planoSaude || 0,
+        outrosBeneficios: inputs?.outrosBeneficios || 0
+      },
+      custoMensal: this.parseValue(outputs['Custo Mensal Total']),
+      custoAnual: this.parseValue(outputs['Custo Anual']),
+      observacao: ''
+    }
+  }
+
   // Factory method - retorna dados baseado no tipo
   static parseByType(calc: SavedCalculation) {
     switch (calc.calculator_slug) {
@@ -82,6 +111,8 @@ export class CalculationParser {
         return this.parseFerias(calc)
       case '13o-salario':
         return this.parseDecimoTerceiro(calc)
+      case 'custo-funcionario':
+        return this.parseCustoFuncionario(calc)
       default:
         return {}
     }

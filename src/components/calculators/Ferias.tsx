@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { InfoIcon, Calendar, Clock, ArrowLeft, Home } from 'lucide-react'
+import { InfoIcon, Calendar, Clock, ArrowLeft, Home, Grid3X3, BookmarkCheck, RotateCcw } from 'lucide-react'
 import { CalculationResult } from './CalculationResult'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { NumberInput } from '@/components/ui/number-input'
@@ -24,7 +24,11 @@ import { ViewSavedCalculationsButton } from './ViewSavedCalculationsButton'
 import { SavedCalculationsView } from './SavedCalculationsView'
 import { useCalculationResult } from '@/hooks/useCalculationResult'
 import { CalculationParser } from '@/lib/calculation-parser'
-import { CalculatorHome } from './CalculatorHome'
+import { useCalculator } from '@/contexts/CalculatorContext'
+import { useUser } from '@clerk/nextjs'
+import { PublicLoginModal } from '@/components/auth/PublicLoginModal'
+
+
 
 interface FeriasProps {
   onCalculate?: (result: FeriasResult) => void
@@ -33,16 +37,19 @@ interface FeriasProps {
   articleSlug?: string
   showBackButton?: boolean
   onBack?: () => void
-  onNavigateToCalculator?: (calculatorId: string) => void
+
 }
 
-export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, showBackButton, onBack, onNavigateToCalculator }: FeriasProps) {
+export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, showBackButton, onBack }: FeriasProps) {
   const [hasStarted, setHasStarted] = useState(false)
   const [showSavedCalculations, setShowSavedCalculations] = useState(false)
   const [showEmailCapture, setShowEmailCapture] = useState(false)
-  const [showCalculatorHome, setShowCalculatorHome] = useState(false)
-  
-  // Hook limpo para gerenciar resultados
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [fadeClass, setFadeClass] = useState('opacity-100')
+
+  // Hooks
+  const { showHome, showCalculatorHome } = useCalculator()
+  const { user } = useUser()
   const calculationResult = useCalculationResult('ferias')
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationMessage, setValidationMessage] = useState('')
@@ -98,10 +105,15 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
     })
   }
 
-  const onError = () => {
+  const onError = async () => {
     console.log('[DEBUG] onError called, errors:', form.formState.errors)
     
+    // Forçar validação antes de verificar erros
+    await form.trigger()
+    
     const errors = form.formState.errors
+    console.log('[DEBUG] Errors after trigger:', errors)
+    
     if (Object.keys(errors).length > 0) {
       // Criar mensagem de erro
       const firstErrorField = Object.keys(errors)[0]
@@ -116,59 +128,40 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
       
       setValidationMessage(errorMessage)
       setShowValidationModal(true)
+    } else {
+      // Se não há erros detectados, mostrar erro genérico
+      setValidationMessage('Por favor, preencha todos os campos obrigatórios.')
+      setShowValidationModal(true)
     }
   }
 
 
 
-  // Mostrar home de calculadoras
-  if (showCalculatorHome) {
-    return (
-      <TooltipProvider>
-        <div className="relative w-full max-w-lg">
-          <Card className="w-full h-[500px] shadow-lg border border-gray-400 rounded-2xl overflow-hidden" style={{ backgroundColor: '#F5F5F5' }}>
-            <CalculatorHome
-              onSelectCalculator={(calculatorId) => {
-                console.log('[DEBUG] Navegando para calculadora:', calculatorId)
-                if (calculatorId === 'ferias') {
-                  // Se selecionar férias, fecha home e meus calculos, volta pra tela principal
-                  setShowCalculatorHome(false)
-                  setShowSavedCalculations(false)
-                  calculationResult.reset()
-                } else if (onNavigateToCalculator) {
-                  // Se for outra calculadora, navega diretamente
-                  onNavigateToCalculator(calculatorId)
-                } else {
-                  // Fallback: apenas fecha o home se não houver callback
-                  setShowCalculatorHome(false)
-                }
-              }}
-            />
-          </Card>
-        </div>
-      </TooltipProvider>
-    )
-  }
+
 
   // Mostrar cálculos salvos
   if (showSavedCalculations) {
     return (
       <TooltipProvider>
         <div className="relative w-full max-w-lg">
-          <Card className="w-full h-[500px] shadow-lg border border-gray-400 rounded-2xl overflow-hidden" style={{ backgroundColor: '#F5F5F5' }}>
+          <Card className={`w-full shadow-lg border border-gray-400 rounded-2xl overflow-hidden transition-opacity duration-300 ${fadeClass}`} style={{ backgroundColor: '#F5F5F5' }}>
             <SavedCalculationsView 
 
               onBack={() => {
-                // Resetar tudo e ir para tela de novo cálculo
-                calculationResult.reset()
-                form.reset()
-                setShowSavedCalculations(false)
+                // Animação de fade-out
+                setFadeClass('opacity-0')
+                setTimeout(() => {
+                  // Resetar tudo e ir para tela de novo cálculo
+                  calculationResult.reset()
+                  form.reset()
+                  setShowSavedCalculations(false)
+                  // Fade-in da tela principal
+                  setFadeClass('opacity-100')
+                }, 150)
               }}
               onShowCalculatorHome={() => {
                 // Fecha meus calculos primeiro
                 setShowSavedCalculations(false)
-                // Depois mostra o home
-                setShowCalculatorHome(true)
               }}
               onSelectCalculation={(calc) => {
                 console.log('[DEBUG] Cálculo selecionado:', calc)
@@ -304,43 +297,50 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
   return (
     <TooltipProvider>
       <div className="relative w-full max-w-lg">
-        <Card className="w-full shadow-lg border border-gray-400 rounded-2xl overflow-hidden" style={{ backgroundColor: '#F5F5F5' }}>
+        {/* Erro de Validação FORA do Card para ficar por cima */}
+        <InlineValidationError
+          isVisible={showValidationModal}
+          onClose={() => setShowValidationModal(false)}
+          title="Ops! Alguns campos estão em branco"
+          message={validationMessage}
+          showImage={true}
+        />
+        
+        <Card className={`quiz-snake-border w-full shadow-lg rounded-2xl overflow-hidden transition-opacity duration-300 ${fadeClass}`}>
           {/* Toast Containers */}
           <InlineToastContainer />
           <CalculatorErrorToastContainer />
           
-          {/* Erro de Validação DENTRO do Card */}
-          <InlineValidationError
-            isVisible={showValidationModal}
-            onClose={() => setShowValidationModal(false)}
-            title="Ops! Alguns campos estão em branco"
-            message={validationMessage}
-            showImage={true}
-          />
+          {/* Back Button removido */}
+
           
-          {/* Back Button Integrado */}
-          {showBackButton && onBack && (
-            <button
-              onClick={onBack}
-              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-gray-100/80 hover:bg-gray-200/80 backdrop-blur-sm transition-all duration-200 flex items-center justify-center group"
-            >
-              <ArrowLeft className="h-4 w-4 text-gray-600 group-hover:text-gray-800" />
-            </button>
-          )}
-          
-          <CardHeader className="pb-3 px-6 pt-3">
+          <CardHeader className="pb-1 px-6 pt-1">
             <CardTitle className="text-lg font-medium text-gray-900 flex items-center justify-center gap-2">
               <span>🏖️</span>
               Calculadora de Férias
             </CardTitle>
-            <CardDescription className="text-center text-sm text-gray-600 mt-2">
+            <CardDescription className="text-center text-sm text-gray-600 mt-1">
               Calcule suas férias de forma rápida e fácil
             </CardDescription>
+            
+            {/* Botão Ver Cálculos Salvos abaixo da descrição - sempre visível */}
+            <div className="flex justify-center mt-1">
+              <button
+                onClick={() => {
+                  console.log('[Ferias] Ver cálculos salvos - indo direto')
+                  setShowSavedCalculations(true)
+                }}
+                className="px-2 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-700"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span className="font-medium">Ver Cálculos Salvos</span>
+              </button>
+            </div>
           </CardHeader>
           
-          <CardContent className="px-6 pb-6 pt-2">
+          <CardContent className="px-6 pb-4 pt-1">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-8">
+              <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-5">
                 {/* Campo de Salário - Minimalista */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -356,7 +356,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                   </div>
                   <CurrencyInput
                     label=""
-                    placeholder="R$ 0,00"
+                    placeholder="0,00"
                     value={form.watch('salarioMensal') || 0}
                     onChange={(value) => {
                       form.setValue('salarioMensal', value || undefined as any)
@@ -392,7 +392,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                       min={1}
                       max={12}
                       icon={Calendar}
-                      iconColor="text-blue-500"
+                      iconColor="text-purple-600"
                     />
                   </div>
 
@@ -425,41 +425,35 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                   </div>
                 </div>
 
-                <div className="space-y-3 pt-2">
-                  {/* Botões lado a lado */}
-                  <div className="flex gap-3 justify-center">
+                <div className="space-y-2 pt-1">
+                  {/* Botão Calcular centralizado */}
+                  <div className="flex justify-center">
                     <Button 
                       type="submit" 
-                      className="flex-1 max-w-[160px] px-4 py-2 text-sm font-medium text-black transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                      className="max-w-[160px] px-4 py-2 text-sm font-medium text-black transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02]"
                       style={{ backgroundColor: '#BAFF1B' }}
                     >
                       Calcular Férias
                     </Button>
-                    
-                    <Button 
-                      variant="outline"
-                      onClick={() => setShowSavedCalculations(true)}
-                      className="flex-1 max-w-[160px] px-4 py-2 text-sm font-medium transition-all duration-200"
-                      style={{ 
-                        backgroundColor: '#6B7280', 
-                        borderColor: '#4B5563',
-                        color: 'white'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#4B5563'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#6B7280'
-                      }}
-                    >
-                      Ver Cálculos Salvos
-                    </Button>
                   </div>
                   
-                  {/* Disclaimer sem linha */}
-                  <p className="text-xs text-gray-400 text-center pt-2">
-                    Estes valores são estimativas para orientação
-                  </p>
+                  {/* Texto clicável para outras calculadoras */}
+                  <div className="flex justify-center mt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        console.log('[Ferias] Navegando para outras calculadoras')
+                        console.log('[Ferias] Estado atual - showCalculatorHome:', showCalculatorHome)
+                        showHome()
+                        console.log('[Ferias] Chamou showHome()')
+                      }}
+                      className="text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+                    >
+                      Experimente <span className="font-bold underline">outras calculadoras</span> também ✨
+                    </button>
+                  </div>
+                  
+
                 </div>
               </form>
             </Form>
@@ -503,13 +497,34 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
           calculatorType="ferias"
           calculationData={form.getValues()}
           onShowSavedCalculations={() => setShowSavedCalculations(true)}
-          onShowCalculatorHome={() => setShowCalculatorHome(true)}
+              
           isFromSavedCalculation={calculationResult.result.isFromSaved}
           savedCalculationType={calculationResult.result.savedType}
         />
 
 
       </div>
+
+      {/* Modal de Login - Dentro do card, estilo Apple */}
+      {showLoginModal && (
+        <div className="absolute inset-0 z-10 rounded-lg overflow-hidden">
+          <div 
+            className="h-full border border-gray-200/60 shadow-none backdrop-blur-xl rounded-lg"
+            style={{ 
+              backgroundColor: '#F5F5F5',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            <div className="p-6 h-full flex flex-col justify-center">
+              <PublicLoginModal
+                onSuccess={() => setShowLoginModal(false)}
+                onCancel={() => setShowLoginModal(false)}
+                isInline={true}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </TooltipProvider>
   )
 }

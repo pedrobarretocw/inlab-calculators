@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
         user_id: userId,
         email: validatedData.email,
         calculator_slug: validatedData.calculatorSlug,
+        name: validatedData.name,
         inputs: validatedData.inputs,
         outputs: validatedData.outputs,
         created_at: new Date().toISOString(),

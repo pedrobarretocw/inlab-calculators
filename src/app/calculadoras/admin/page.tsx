@@ -100,7 +100,6 @@ function CalculatorsTab() {
           </CardContent>
         </Card>
       </div>
-
     </div>
   )
 }
@@ -212,7 +211,8 @@ function SettingsTab() {
 
 export default async function AdminPage() {
   // O middleware já fez toda a verificação necessária
-  console.log('[AdminPage] Rendering admin dashboard')
+  // Não precisamos de verificação dupla aqui para evitar loops
+  console.log('[AdminPage] Renderizando dashboard admin (acesso já verificado pelo middleware)')
   
   return (
     <div className="min-h-screen bg-gray-50">

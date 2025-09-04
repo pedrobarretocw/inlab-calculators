@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { Ferias } from '@/components/calculators/Ferias'
-
 import { CustoFuncionario } from '@/components/calculators/CustoFuncionario'
 import { DecimoTerceiro } from '@/components/calculators/DecimoTerceiro'
 import { getVariant, setVariant } from '@/lib/tracking'
+import { PublicClerkProvider } from '@/components/auth/PublicClerkProvider'
 
 interface EmbedABProps {
   articleSlug?: string
 }
 
-export function EmbedAB({ articleSlug }: EmbedABProps) {
+function EmbedABContent({ articleSlug }: EmbedABProps) {
   const [selectedCalculator, setSelectedCalculator] = useState<string>('')
   const [variant, setCurrentVariant] = useState<string>('')
   const [loading, setLoading] = useState(true)
@@ -123,5 +123,13 @@ export function EmbedAB({ articleSlug }: EmbedABProps) {
     <div className="w-full max-w-[500px] max-h-[500px] overflow-auto p-4">
       {renderCalculator()}
     </div>
+  )
+}
+
+export function EmbedAB({ articleSlug }: EmbedABProps) {
+  return (
+    <PublicClerkProvider>
+      <EmbedABContent articleSlug={articleSlug} />
+    </PublicClerkProvider>
   )
 }

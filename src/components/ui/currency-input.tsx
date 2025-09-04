@@ -131,7 +131,7 @@ export function CurrencyInput({
       <FormControl>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span className="text-green-600 font-bold text-sm">R$</span>
+            <span className="text-purple-600 font-bold text-sm">R$</span>
           </div>
           <Input
             placeholder={placeholder}

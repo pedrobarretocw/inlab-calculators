@@ -41,6 +41,7 @@ export const trackEventSchema = z.object({
 // Schema para salvar cálculo
 export const saveCalculationSchema = z.object({
   calculatorSlug: z.string(),
+  name: z.string().max(40).optional().nullable(),
   inputs: z.record(z.string(), z.unknown()),
   outputs: z.record(z.string(), z.unknown()),
   email: z.string().email(),

@@ -56,20 +56,19 @@ export function CalculatorModal({ calculatorSlug, calculatorName, embedType }: C
       case 'single':
         switch (calculatorSlug) {
           case 'ferias':
-            return <Ferias />
-
+            return <EmbedAll initialCalculator="ferias" />
           case 'custo-funcionario':
-            return <CustoFuncionario />
+            return <EmbedAll initialCalculator="custo-funcionario" />
           case '13o-salario':
-            return <DecimoTerceiro />
+            return <EmbedAll initialCalculator="13o-salario" />
           default:
             return <div className="p-8 text-center text-muted-foreground">Calculator not found</div>
         }
       case 'ab':
         // Para A/B, vamos mostrar uma calculadora aleatória
-        const randomCalculators = [<Ferias key="ferias" />, <CustoFuncionario key="custo" />, <DecimoTerceiro key="13o" />]
+        const randomCalculators = ['ferias', 'custo-funcionario', '13o-salario']
         const randomIndex = Math.floor(Math.random() * randomCalculators.length)
-        return randomCalculators[randomIndex]
+        return <EmbedAll initialCalculator={randomCalculators[randomIndex]} />
       case 'carousel':
         return <EmbedAll />
       default:
@@ -112,9 +111,7 @@ export function CalculatorModal({ calculatorSlug, calculatorName, embedType }: C
           </DialogHeader>
           
           <div className="mt-4 max-h-[500px] overflow-y-auto">
-            <div className="max-w-[500px] mx-auto">
-              {renderCalculatorComponent()}
-            </div>
+            {renderCalculatorComponent()}
           </div>
         </DialogContent>
       </Dialog>

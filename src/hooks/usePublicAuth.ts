@@ -1,6 +1,6 @@
 'use client'
 
-import { useSignIn, useSignUp, useUser } from '@clerk/nextjs'
+import { useSignIn, useSignUp, useUser, useClerk } from '@clerk/nextjs'
 import { useState } from 'react'
 
 export function usePublicAuth() {
@@ -10,6 +10,10 @@ export function usePublicAuth() {
   const { signIn, isLoaded: signInLoaded } = useSignIn()
   const { signUp, isLoaded: signUpLoaded } = useSignUp()
   const { user, isLoaded: userLoaded } = useUser()
+  const { setActive } = useClerk()
+
+  // Debug: verificar se estamos na instância pública
+  console.log('[usePublicAuth] Hook inicializado - instância pública')
 
   const signInWithEmail = async (email: string) => {
     if (!signInLoaded || !signUpLoaded) return false
@@ -67,46 +71,48 @@ export function usePublicAuth() {
     return { success: false, error: 'Erro inesperado' }
   }
 
-  const verifyCode = async (code: string, mode: 'signin' | 'signup', onSuccess?: () => Promise<void>) => {
+  const verifyCode = async (code: string, mode: 'signin' | 'signup') => {
+    console.log(`[usePublicAuth] Verificando código: ${code} (modo: ${mode})`)
     setIsLoading(true)
     setError(null)
 
     try {
       // Verificar se já existe uma sessão ativa
       if (user) {
-        // Usuário já está logado, apenas executar callback
-        if (onSuccess) {
-          await onSuccess()
-        }
+        console.log('[usePublicAuth] Usuário já autenticado')
         return { success: true, alreadyAuthenticated: true }
       }
 
       if (mode === 'signup') {
+        console.log('[usePublicAuth] Tentando verificar código via signUp (instância pública)')
+        if (!signUp) {
+          console.error('[usePublicAuth] SignUp não disponível')
+          setError('Erro de inicialização. Tente novamente.')
+          setIsLoading(false)
+          return { success: false, error: 'SignUp não disponível' }
+        }
         // Usar a instância atual do signUp
         const result = await signUp.attemptEmailAddressVerification({ code })
+        console.log('[usePublicAuth] Resultado signUp:', result.status)
         if (result.status === 'complete') {
-          await signUp.setActive({ session: result.createdSessionId })
-          
-          // Executar callback (ex: salvar cálculo)
-          if (onSuccess) {
-            await onSuccess()
-          }
-          
-          // Não redirecionar - deixar o componente lidar com isso
+          await setActive({ session: result.createdSessionId })
+          console.log('[usePublicAuth] ✅ SignUp bem-sucedido na instância pública')
           return { success: true }
         }
       } else {
+        console.log('[usePublicAuth] Tentando verificar código via signIn (instância pública)')
+        if (!signIn) {
+          console.error('[usePublicAuth] SignIn não disponível')
+          setError('Erro de inicialização. Tente novamente.')
+          setIsLoading(false)
+          return { success: false, error: 'SignIn não disponível' }
+        }
         // Usar a instância atual do signIn
         const result = await signIn.attemptFirstFactor({ strategy: 'email_code', code })
+        console.log('[usePublicAuth] Resultado signIn:', result.status)
         if (result.status === 'complete') {
-          await signIn.setActive({ session: result.createdSessionId })
-          
-          // Executar callback (ex: salvar cálculo)
-          if (onSuccess) {
-            await onSuccess()
-          }
-          
-          // Não redirecionar - deixar o componente lidar com isso
+          await setActive({ session: result.createdSessionId })
+          console.log('[usePublicAuth] ✅ SignIn bem-sucedido na instância pública')
           return { success: true }
         }
       }
@@ -115,15 +121,18 @@ export function usePublicAuth() {
       setIsLoading(false)
       return { success: false, error: 'Código inválido' }
     } catch (err: unknown) {
-      console.error('Erro ao verificar código:', err)
+      console.error('[usePublicAuth] ❌ Erro ao verificar código:', err)
+      console.error('[usePublicAuth] Detalhes do erro:', (err as any)?.errors)
       
       // Tratar erro de sessão existente
       if ((err as any)?.errors?.[0]?.code === 'session_exists') {
-        // Usuário já está logado, apenas executar callback
-        if (onSuccess) {
-          await onSuccess()
-        }
+        console.log('[usePublicAuth] Usuário já possui sessão ativa')
         return { success: true, alreadyAuthenticated: true }
+      }
+      
+      // Log específico sobre código inválido
+      if ((err as any)?.errors?.[0]?.code === 'form_code_incorrect') {
+        console.log('[usePublicAuth] Código incorreto fornecido')
       }
       
       setError('Código inválido. Tente novamente.')

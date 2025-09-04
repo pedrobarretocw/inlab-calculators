@@ -44,7 +44,17 @@ export function useCalculationResult(currentCalculatorType: string) {
     
     // REGRA: Se é salvo, usar o tipo do salvo. Se é novo, usar tipo da calculadora atual.
     const typeToFormat = result.isFromSaved ? result.savedType : currentCalculatorType
-    return ResultFormatter.formatByType(typeToFormat || currentCalculatorType, result.data)
+    const finalType = typeToFormat || currentCalculatorType
+    
+    console.log('[useCalculationResult] Formatando:', { 
+      currentCalculatorType, 
+      isFromSaved: result.isFromSaved, 
+      savedType: result.savedType,
+      finalType,
+      data: result.data 
+    })
+    
+    return ResultFormatter.formatByType(finalType, result.data)
   }
 
   return {

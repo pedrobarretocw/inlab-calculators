@@ -1,61 +1,112 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
-import { clerkAdminConfig } from '@/lib/clerk-config'
+/**
+ * Utility para verificação de acesso administrativo
+ * 
+ * REGRA DEFINITIVA: Apenas usuários @cloudwalk.io da instância admin podem acessar
+ */
 
-interface AdminAuthResult {
-  userId: string
-  email: string
-  isValid: boolean
+import { auth } from '@clerk/nextjs/server'
+
+export interface AdminAuthResult {
+  isAuthorized: boolean
+  email?: string
+  userId?: string
+  reason?: string
 }
 
 /**
- * Verifica se o usuário atual é um admin válido
- * IMPORTANTE: Esta função DEVE ser chamada em Server Components
+ * Verifica se o usuário atual tem acesso administrativo
+ * 
+ * @returns Promise<AdminAuthResult>
  */
-export async function requireAdminAuth(): Promise<AdminAuthResult> {
+export async function checkAdminAccess(): Promise<AdminAuthResult> {
   try {
-    // 1. Obter o usuário do contexto atual usando currentUser
-    const user = await currentUser()
+    const { userId, sessionClaims } = await auth()
     
-    if (!user) {
-      console.log('[AdminAuth] No user found - redirecting to login')
-      redirect('/calculadoras/admin/login')
-    }
-
-    const email = user.emailAddresses?.[0]?.emailAddress || ''
-    
-    // 2. Verificar domínio @cloudwalk.io
-    if (!email.endsWith('@cloudwalk.io')) {
-      console.log('[AdminAuth] Invalid domain:', email)
-      redirect('/calculadoras/admin/access-denied')
+    // 1. Verificar se está logado
+    if (!userId) {
+      return {
+        isAuthorized: false,
+        reason: 'Usuário não está logado'
+      }
     }
     
-    console.log('[AdminAuth] Valid admin user:', email)
+    // 2. Verificar se é da instância admin
+    const adminInstanceId = process.env.NEXT_PUBLIC_CLERK_ADMIN_PUBLISHABLE_KEY?.split('_')[1]
+    const isFromAdminInstance = adminInstanceId && sessionClaims?.iss?.includes(adminInstanceId)
+    
+    if (!isFromAdminInstance) {
+      return {
+        isAuthorized: false,
+        userId,
+        email: sessionClaims?.email as string,
+        reason: 'Usuário não é da instância administrativa'
+      }
+    }
+    
+    // 3. Verificar se o email é @cloudwalk.io
+    const userEmail = sessionClaims?.email as string
+    const isCloudwalkEmail = userEmail && userEmail.endsWith('@cloudwalk.io')
+    
+    if (!isCloudwalkEmail) {
+      return {
+        isAuthorized: false,
+        userId,
+        email: userEmail,
+        reason: 'Email não é do domínio @cloudwalk.io'
+      }
+    }
+    
+    // 4. Tudo OK - acesso autorizado
     return {
-      userId: user.id,
-      email,
-      isValid: true
+      isAuthorized: true,
+      userId,
+      email: userEmail
     }
+    
   } catch (error) {
-    console.error('[AdminAuth] Unexpected error:', error)
-    redirect('/calculadoras/admin/login')
+    console.error('[AdminAuth] Erro ao verificar acesso:', error)
+    return {
+      isAuthorized: false,
+      reason: `Erro interno: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+    }
   }
 }
 
 /**
- * Verificação para o middleware - não faz redirect, apenas retorna boolean
+ * Hook para verificação de acesso admin em componentes
+ * Retorna informações de autorização e dados do usuário
  */
-export async function isAdminUser(): Promise<boolean> {
-  try {
-    const user = await currentUser()
-    
-    if (!user) {
-      return false
-    }
-
-    const email = user.emailAddresses?.[0]?.emailAddress || ''
-    return email.endsWith('@cloudwalk.io')
-  } catch {
-    return false
+export async function requireAdminAccess(): Promise<AdminAuthResult> {
+  const result = await checkAdminAccess()
+  
+  if (!result.isAuthorized) {
+    console.warn('[AdminAuth] Acesso negado:', result.reason)
+  } else {
+    console.log(`[AdminAuth] Acesso autorizado para: ${result.email}`)
   }
+  
+  return result
+}
+
+/**
+ * Middleware helper para verificar acesso admin
+ * Usado em API routes para verificação server-side
+ */
+export function isCloudwalkEmail(email: string): boolean {
+  return email && email.endsWith('@cloudwalk.io')
+}
+
+/**
+ * Extrai email do sessionClaims do Clerk
+ */
+export function extractEmailFromClaims(sessionClaims: any): string | null {
+  return sessionClaims?.email || null
+}
+
+/**
+ * Verifica se usuário é da instância admin baseado no JWT issuer
+ */
+export function isFromAdminInstance(sessionClaims: any): boolean {
+  const adminInstanceId = process.env.NEXT_PUBLIC_CLERK_ADMIN_PUBLISHABLE_KEY?.split('_')[1]
+  return adminInstanceId && sessionClaims?.iss?.includes(adminInstanceId)
 }

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from '@/components/ui/sonner'
-import { clerkAdminConfig } from '@/lib/clerk-config'
+import { CalculatorProvider } from '@/contexts/CalculatorContext'
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,16 +22,10 @@ export const metadata: Metadata = {
 // Flag para ativar/desativar Clerk em desenvolvimento
 const isClerkEnabled = () => process.env.ENABLE_CLERK === 'true'
 
-// Wrapper condicional para ClerkProvider (usando configuração admin)
+// Sem ClerkProvider global - cada área usa sua própria instância
 function AuthProvider({ children }: { children: React.ReactNode }) {
-  if (isClerkEnabled()) {
-    return (
-      <ClerkProvider publishableKey={clerkAdminConfig.publishableKey}>
-        {children}
-      </ClerkProvider>
-    )
-  }
-  
+  // NÃO mais colocamos ClerkProvider global para evitar conflitos
+  // Cada área (admin/public) usa sua própria instância
   return <>{children}</>
 }
 
@@ -47,7 +40,9 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          {children}
+          <CalculatorProvider>
+            {children}
+          </CalculatorProvider>
           <Toaster />
         </body>
       </html>

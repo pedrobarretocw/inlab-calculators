@@ -58,17 +58,62 @@ export class ResultFormatter {
     ]
   }
 
+  static formatCustoFuncionario(data: CalculationData): FormattedResult[] {
+    return [
+      {
+        label: 'Salário Base',
+        value: formatCurrency(data.salarioBase || 0)
+      },
+      {
+        label: '13º Salário (prop.)',
+        value: formatCurrency(data.decimoTerceiro || 0)
+      },
+      {
+        label: 'Férias + 1/3 (prop.)',
+        value: formatCurrency((data.ferias || 0))
+      },
+      {
+        label: 'FGTS (8%)',
+        value: formatCurrency(data.fgts || 0)
+      },
+      {
+        label: 'Encargos Sociais',
+        value: formatCurrency(data.encargos || 0)
+      },
+      {
+        label: 'Benefícios',
+        value: formatCurrency(data.beneficios?.total || 0)
+      },
+      {
+        label: 'Custo Mensal Total',
+        value: formatCurrency(data.custoMensal || 0),
+        highlight: true
+      },
+      {
+        label: 'Custo Anual',
+        value: formatCurrency(data.custoAnual || 0),
+        highlight: true
+      }
+    ]
+  }
+
 
 
 
   static formatByType(type: string, data: CalculationData): FormattedResult[] {
+    console.log('[ResultFormatter] formatByType:', { type, data })
+    
     switch (type) {
       case 'ferias':
         return this.formatFerias(data)
       case '13o-salario':
         return this.formatDecimoTerceiro(data)
-
+      case 'custo-funcionario':
+        const result = this.formatCustoFuncionario(data)
+        console.log('[ResultFormatter] formatCustoFuncionario result:', result)
+        return result
       default:
+        console.log('[ResultFormatter] Tipo não encontrado:', type)
         return []
     }
   }
