@@ -82,7 +82,7 @@ function AuthForm({ title, description, redirectTo, requireDomainValidation, val
       return
     } catch (signUpErr: unknown) {
       // If user exists, try sign-in
-      const err = signUpErr as any // Type guard for Clerk error structure
+      const err = signUpErr as { errors?: Array<{ code: string }> } // Type guard for Clerk error structure
       if (err.errors?.[0]?.code === 'form_identifier_exists') {
         try {
           const signInAttempt = await signIn.create({
@@ -145,7 +145,7 @@ function AuthForm({ title, description, redirectTo, requireDomainValidation, val
         }
       }
     } catch (error: unknown) {
-      const err = error as any // Type guard for Clerk error structure
+      const err = error as { errors?: Array<{ code: string }> } // Type guard for Clerk error structure
       if (err.errors?.[0]?.code === 'form_code_incorrect') {
         setDomainError('Invalid verification code. Please check and try again.')
       } else if (err.errors?.[0]?.code === 'verification_expired') {
@@ -360,7 +360,7 @@ export default function CustomAuthForm({ title, description, redirectTo, require
           <div className="max-w-md">
             <h2 className="text-2xl font-bold mb-4">Built by InLab Mafia</h2>
             <blockquote className="text-slate-200 text-base italic leading-relaxed">
-              "With great power, comes great responsibility"
+              &ldquo;With great power, comes great responsibility&rdquo;
               <br />
               <span className="text-slate-400 text-sm not-italic">— Spider-Man, 2002</span>
             </blockquote>

@@ -8,7 +8,16 @@ export interface FormattedResult {
 }
 
 export interface CalculationData {
-  [key: string]: any
+  [key: string]: number | string | boolean | { [key: string]: number } | undefined
+}
+
+// Type guard helpers
+function asNumber(value: number | string | boolean | { [key: string]: number } | undefined): number {
+  return typeof value === 'number' ? value : 0
+}
+
+function asObject(value: number | string | boolean | { [key: string]: number } | undefined): { [key: string]: number } | undefined {
+  return typeof value === 'object' && value !== null ? value : undefined
 }
 
 export class ResultFormatter {
@@ -16,16 +25,16 @@ export class ResultFormatter {
     return [
       {
         label: 'Valor Proporcional',
-        value: formatCurrency(data.valorProporcional || 0),
+        value: formatCurrency(asNumber(data.valorProporcional)),
         highlight: true
       },
       {
         label: 'Adicional 1/3',
-        value: formatCurrency(data.adicionalUmTerco || 0)
+        value: formatCurrency(asNumber(data.adicionalUmTerco))
       },
       {
         label: 'Total Líquido',
-        value: formatCurrency(data.valorLiquido || 0),
+        value: formatCurrency(asNumber(data.valorLiquido)),
         highlight: true
       }
     ]
@@ -35,24 +44,24 @@ export class ResultFormatter {
     return [
       {
         label: 'Valor Proporcional',
-        value: formatCurrency(data.valorProporcional || 0),
+        value: formatCurrency(asNumber(data.valorProporcional)),
         highlight: true
       },
       {
         label: '1ª Parcela (até 30/11)',
-        value: formatCurrency(data.primeiraParcela || 0)
+        value: formatCurrency(asNumber(data.primeiraParcela))
       },
       {
         label: '2ª Parcela (até 20/12)',
-        value: formatCurrency(data.segundaParcela || 0)
+        value: formatCurrency(asNumber(data.segundaParcela))
       },
       {
         label: 'INSS estimado',
-        value: `- ${formatCurrency(data.inss || 0)}`
+        value: `- ${formatCurrency(asNumber(data.inss))}`
       },
       {
         label: 'Valor Líquido Estimado',
-        value: formatCurrency(data.valorLiquido || 0),
+        value: formatCurrency(asNumber(data.valorLiquido)),
         highlight: true
       }
     ]
@@ -62,36 +71,36 @@ export class ResultFormatter {
     return [
       {
         label: 'Salário Base',
-        value: formatCurrency(data.salarioBase || 0)
+        value: formatCurrency(asNumber(data.salarioBase))
       },
       {
         label: '13º Salário (prop.)',
-        value: formatCurrency(data.decimoTerceiro || 0)
+        value: formatCurrency(asNumber(data.decimoTerceiro))
       },
       {
         label: 'Férias + 1/3 (prop.)',
-        value: formatCurrency((data.ferias || 0))
+        value: formatCurrency(asNumber(data.ferias))
       },
       {
         label: 'FGTS (8%)',
-        value: formatCurrency(data.fgts || 0)
+        value: formatCurrency(asNumber(data.fgts))
       },
       {
         label: 'Encargos Sociais',
-        value: formatCurrency(data.encargos || 0)
+        value: formatCurrency(asNumber(data.encargos))
       },
       {
         label: 'Benefícios',
-        value: formatCurrency(data.beneficios?.total || 0)
+        value: formatCurrency(asObject(data.beneficios)?.total || 0)
       },
       {
         label: 'Custo Mensal Total',
-        value: formatCurrency(data.custoMensal || 0),
+        value: formatCurrency(asNumber(data.custoMensal)),
         highlight: true
       },
       {
         label: 'Custo Anual',
-        value: formatCurrency(data.custoAnual || 0),
+        value: formatCurrency(asNumber(data.custoAnual)),
         highlight: true
       }
     ]

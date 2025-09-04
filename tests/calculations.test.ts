@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { 
   calcularFerias, 
-  calcularProLabore, 
   calcularCustoFuncionario, 
   calcularDecimoTerceiro 
 } from '../src/lib/calculations'
@@ -41,35 +40,6 @@ describe('Calculadora de Férias', () => {
   })
 })
 
-describe('Calculadora de Pró-Labore', () => {
-  it('deve calcular pró-labore com percentual', () => {
-    const input = {
-      faturamentoMensal: 10000,
-      percentualProLabore: 20,
-      outrosCustos: 500,
-    }
-    
-    const result = calcularProLabore(input)
-    
-    expect(result.valorSugerido).toBe(2000) // 10000 * 20%
-    expect(result.percentualCalculado).toBe(20)
-    expect(result.inss).toBe(220) // 2000 * 11%
-    expect(result.valorLiquido).toBe(1780) // 2000 - 220
-    expect(result.custoTotal).toBe(2500) // 2000 + 500
-  })
-
-  it('deve usar sugestão padrão de 20%', () => {
-    const input = {
-      faturamentoMensal: 5000,
-      outrosCustos: 0,
-    }
-    
-    const result = calcularProLabore(input)
-    
-    expect(result.percentualCalculado).toBe(20)
-    expect(result.valorSugerido).toBe(1000) // 5000 * 20%
-  })
-})
 
 describe('Calculadora de 13º Salário', () => {
   it('deve calcular 13º salário para ano completo', () => {

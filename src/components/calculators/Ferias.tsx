@@ -55,10 +55,17 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationMessage, setValidationMessage] = useState('')
   
-  const form = useForm<FeriasInput>({
-    resolver: zodResolver(feriasSchema) as any,
+  // Helper para converter valores de forma segura
+  const convertToNumber = (value: unknown): number => {
+    if (typeof value === 'number') return value
+    if (typeof value === 'string') return parseFloat(value) || 0
+    return 0
+  }
+
+  const form = useForm({
+    resolver: zodResolver(feriasSchema),
     defaultValues: {
-      salarioMensal: undefined as any, // Para forçar validação
+      salarioMensal: 0, // Para forçar validação
       mesesTrabalhados: 12,
       diasFerias: 30,
       descontarAdiantamento: false,
@@ -165,9 +172,9 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                 
                 // Preencher formulário com inputs salvos
                 const inputs = calc.inputs || {}
-                form.setValue('salarioMensal', inputs.salarioMensal || 0)
-                form.setValue('mesesTrabalhados', inputs.mesesTrabalhados || 12)
-                form.setValue('diasFerias', inputs.diasFerias || 30)
+                form.setValue('salarioMensal', convertToNumber(inputs.salarioMensal || 0))
+                form.setValue('mesesTrabalhados', convertToNumber(inputs.mesesTrabalhados || 12))
+                form.setValue('diasFerias', convertToNumber(inputs.diasFerias || 30))
                 
                 // Usar os outputs DIRETO do banco via CalculationParser
                 const parsedData = CalculationParser.parseByType(calc)
@@ -226,7 +233,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
           
           <CardContent className="px-6 pb-3 pt-1">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit as any, onError)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
                 {/* Campo de Salário - Minimalista */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -243,9 +250,9 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                   <CurrencyInput
                     label=""
                     placeholder="0,00"
-                    value={form.watch('salarioMensal') || 0}
+                    value={convertToNumber(form.watch('salarioMensal') || 0)}
                     onChange={(value) => {
-                      form.setValue('salarioMensal', value || undefined as any)
+                      form.setValue('salarioMensal', value || 0)
                       handleInputChange()
                     }}
                     onInputChange={handleInputChange}
@@ -269,7 +276,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                     <NumberInput
                       label=""
                       placeholder="12"
-                      value={form.watch('mesesTrabalhados')}
+                      value={convertToNumber(form.watch('mesesTrabalhados'))}
                       onChange={(value) => {
                         form.setValue('mesesTrabalhados', value)
                         handleInputChange()
@@ -297,7 +304,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                     <NumberInput
                       label=""
                       placeholder="30"
-                      value={form.watch('diasFerias')}
+                      value={convertToNumber(form.watch('diasFerias'))}
                       onChange={(value) => {
                         form.setValue('diasFerias', value)
                         handleInputChange()
@@ -378,7 +385,9 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
           onReset={() => calculationResult.reset()}
           isVisible={calculationResult.isVisible}
           calculatorType={calculationResult.result.isFromSaved ? calculationResult.result.savedType : "ferias"}
-          calculationData={form.getValues()}
+          calculationData={Object.fromEntries(
+            Object.entries(form.getValues()).map(([key, value]) => [key, convertToNumber(value)])
+          )}
           onShowSavedCalculations={() => setShowSavedCalculations(true)}
               
           isFromSavedCalculation={calculationResult.result.isFromSaved}

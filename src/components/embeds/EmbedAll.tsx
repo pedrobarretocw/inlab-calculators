@@ -26,7 +26,7 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
   useEffect(() => {
     if (!hasInitialized) {
       if (initialCalculator) {
-        selectCalculator(initialCalculator as any)
+        selectCalculator(initialCalculator as 'ferias' | 'custo-funcionario' | '13o-salario')
         setTimeout(() => {
           setIsLoading(false)
           setHasInitialized(true)
@@ -63,7 +63,7 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
   const handleCalculatorSelect = (calculatorId: string) => {
     setFadeClass('opacity-0')
     setTimeout(() => {
-      selectCalculator(calculatorId as any)
+      selectCalculator(calculatorId as 'ferias' | 'custo-funcionario' | '13o-salario')
       setFadeClass('opacity-100')
     }, 150)
   }

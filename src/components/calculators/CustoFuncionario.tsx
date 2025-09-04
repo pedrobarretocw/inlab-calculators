@@ -53,7 +53,14 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationMessage, setValidationMessage] = useState('')
   
-  const form = useForm<CustoFuncionarioInput>({
+  // Helper para converter valores de forma segura
+  const convertToNumber = (value: unknown): number => {
+    if (typeof value === 'number') return value
+    if (typeof value === 'string') return parseFloat(value) || 0
+    return 0
+  }
+
+  const form = useForm({
     resolver: zodResolver(custoFuncionarioSchema),
     defaultValues: {
       salarioBase: 0,
@@ -169,11 +176,11 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
               onSelectCalculation={(calc) => {
                 // Preencher formulário com inputs salvos
                 const inputs = calc.inputs || {}
-                form.setValue('salarioBase', inputs.salarioBase || 0)
-                form.setValue('valeRefeicao', inputs.valeRefeicao || 0)
-                form.setValue('valeTransporte', inputs.valeTransporte || 0)
-                form.setValue('planoSaude', inputs.planoSaude || 0)
-                form.setValue('outrosBeneficios', inputs.outrosBeneficios || 0)
+                form.setValue('salarioBase', convertToNumber(inputs.salarioBase || 0))
+                form.setValue('valeRefeicao', convertToNumber(inputs.valeRefeicao || 0))
+                form.setValue('valeTransporte', convertToNumber(inputs.valeTransporte || 0))
+                form.setValue('planoSaude', convertToNumber(inputs.planoSaude || 0))
+                form.setValue('outrosBeneficios', convertToNumber(inputs.outrosBeneficios || 0))
                 
                 // Usar os outputs DIRETO do banco via CalculationParser
                 const parsedData = CalculationParser.parseByType(calc)

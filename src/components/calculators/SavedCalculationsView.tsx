@@ -15,8 +15,8 @@ interface SavedCalculation {
   id: string
   calculator_slug: string
   name?: string
-  inputs: Record<string, any>
-  outputs: Record<string, any>
+  inputs: Record<string, number | string | boolean>
+  outputs: Record<string, number | string | boolean | { [key: string]: number } | undefined>
   created_at: string
 }
 
@@ -104,21 +104,31 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
     }
   }
 
-  const getMainResult = (calc: SavedCalculation) => {
+  const getMainResult = (calc: SavedCalculation): string => {
     const outputs = calc.outputs || {}
     const values = Object.values(outputs)
     
+    // Helper para converter valor para string
+    const getValue = (key: string): string | null => {
+      const value = outputs[key]
+      if (typeof value === 'string') return value
+      if (typeof value === 'number') return `R$ ${value.toFixed(2)}`
+      return null
+    }
+    
     // Tentar encontrar o resultado principal
-    if (outputs['Valor Líquido Estimado']) return outputs['Valor Líquido Estimado']
-    if (outputs['Total Líquido']) return outputs['Total Líquido']
-    if (outputs['Valor Líquido']) return outputs['Valor Líquido']
-    if (outputs['Custo Mensal Total']) return outputs['Custo Mensal Total'] // ADICIONADO
-    if (outputs['Custo Total']) return outputs['Custo Total']
-    if (outputs['Pró-labore Líquido']) return outputs['Pró-labore Líquido']
+    const result = getValue('Valor Líquido Estimado') ||
+                  getValue('Total Líquido') ||
+                  getValue('Valor Líquido') ||
+                  getValue('Custo Mensal Total') ||
+                  getValue('Custo Total') ||
+                  getValue('Pró-labore Líquido')
+    
+    if (result) return result
     
     // Se não achou, pegar o primeiro valor numérico
     const firstNumeric = values.find(v => typeof v === 'string' && v.includes('R$'))
-    return firstNumeric || 'N/A'
+    return (firstNumeric as string) || 'N/A'
   }
 
   const handleSelectCalculation = (calc: SavedCalculation) => {

@@ -9,8 +9,8 @@ interface SavedCalculation {
   id: string
   calculator_slug: string
   name?: string
-  inputs: Record<string, any>
-  outputs: Record<string, any>
+  inputs: Record<string, number | string | boolean>
+  outputs: Record<string, number | string | boolean | { [key: string]: number } | undefined>
   created_at: string
 }
 

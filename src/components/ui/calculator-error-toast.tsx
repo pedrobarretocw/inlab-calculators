@@ -126,7 +126,7 @@ export function CalculatorErrorToastContainer({ className }: CalculatorErrorToas
 
   // Expor funções globalmente
   React.useEffect(() => {
-    // @ts-ignore
+    // @ts-expect-error - Global function for iframe communication
     window.__addCalculatorErrorToast = addToast
   }, [addToast])
 
@@ -148,9 +148,9 @@ export function CalculatorErrorToastContainer({ className }: CalculatorErrorToas
 // Hook para usar o toast de erro da calculadora
 export function useCalculatorErrorToast() {
   const addErrorToast = React.useCallback((toast: Omit<CalculatorErrorToastData, 'id'>) => {
-    // @ts-ignore
+    // @ts-expect-error - Global function for iframe communication
     if (window.__addCalculatorErrorToast) {
-      // @ts-ignore
+      // @ts-expect-error - Global function for iframe communication
       window.__addCalculatorErrorToast(toast)
     }
   }, [])

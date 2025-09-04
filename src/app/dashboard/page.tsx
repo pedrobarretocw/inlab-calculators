@@ -56,7 +56,7 @@ export default async function DashboardPage() {
           
           {/* User Calculations */}
           <Suspense fallback={<div>Carregando cálculos...</div>}>
-            <UserCalculations userId={userId} />
+            <UserCalculations userId={userId || ''} />
           </Suspense>
         </div>
       </main>

@@ -29,7 +29,7 @@ const formatCurrencyMask = (value: string): string => {
   if (cleanDigits === '0') return ''
   
   // Converte para número e divide por 100 para ter centavos
-  let number = parseInt(cleanDigits, 10) / 100
+  const number = parseInt(cleanDigits, 10) / 100
   
   // Evita números muito pequenos que podem causar problemas
   if (number < 0.01) return ''

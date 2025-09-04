@@ -23,7 +23,7 @@ interface CalculationResultProps {
   onReset: () => void
   isVisible: boolean
   calculatorType?: string
-  calculationData?: Record<string, any>
+  calculationData?: Record<string, number | string | boolean>
   onShowSavedCalculations?: () => void
   onShowCalculatorHome?: () => void
   isFromSavedCalculation?: boolean

@@ -67,7 +67,7 @@ export default async function UsuariosPage() {
           
           {/* User Calculations */}
           <Suspense fallback={<div>Carregando cálculos...</div>}>
-            <UserCalculations userId={userId} />
+            <UserCalculations userId={userId || ''} />
           </Suspense>
         </div>
       </main>

@@ -138,7 +138,7 @@ export function InlineToastContainer({ className }: InlineToastContainerProps) {
 
   // Expor funções globalmente para o contexto
   React.useEffect(() => {
-    // @ts-ignore
+    // @ts-expect-error - Global function for iframe communication
     window.__addInlineToast = addToast
   }, [addToast])
 
@@ -160,9 +160,9 @@ export function InlineToastContainer({ className }: InlineToastContainerProps) {
 // Hook para usar toasts inline
 export function useInlineToast() {
   const addToast = React.useCallback((toast: Omit<ToastData, 'id'>) => {
-    // @ts-ignore
+    // @ts-expect-error - Global function for iframe communication
     if (window.__addInlineToast) {
-      // @ts-ignore
+      // @ts-expect-error - Global function for iframe communication
       window.__addInlineToast(toast)
     }
   }, [])

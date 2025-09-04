@@ -53,9 +53,9 @@ export function showValidationErrors(
   }
 
   // Toast de erro da calculadora com imagem
-  // @ts-ignore
+  // @ts-expect-error - Global function for iframe communication
   if (window.__addCalculatorErrorToast) {
-    // @ts-ignore
+    // @ts-expect-error - Global function for iframe communication
     window.__addCalculatorErrorToast({
       title: options.title || "Ops! Alguns campos estão em branco",
       description: message,
@@ -64,9 +64,9 @@ export function showValidationErrors(
     })
   } else {
     // Fallback para toast inline normal
-    // @ts-ignore
+    // @ts-expect-error - Global function for iframe communication
     if (window.__addInlineToast) {
-      // @ts-ignore
+      // @ts-expect-error - Global function for iframe communication
       window.__addInlineToast({
         type: 'error',
         title: message,
@@ -92,9 +92,9 @@ export function showValidationErrors(
  * Mostra toast de sucesso para cálculo realizado
  */
 export function showCalculationSuccess(calculatorName: string) {
-  // @ts-ignore
+  // @ts-expect-error - Global function for iframe communication
   if (window.__addInlineToast) {
-    // @ts-ignore
+    // @ts-expect-error - Global function for iframe communication
     window.__addInlineToast({
       type: 'success',
       title: `✨ ${calculatorName} calculado com sucesso!`,
@@ -108,9 +108,9 @@ export function showCalculationSuccess(calculatorName: string) {
  * Mostra toast de erro genérico
  */
 export function showCalculationError(message?: string) {
-  // @ts-ignore
+  // @ts-expect-error - Global function for iframe communication
   if (window.__addInlineToast) {
-    // @ts-ignore
+    // @ts-expect-error - Global function for iframe communication
     window.__addInlineToast({
       type: 'error',
       title: message || "Erro ao realizar cálculo",

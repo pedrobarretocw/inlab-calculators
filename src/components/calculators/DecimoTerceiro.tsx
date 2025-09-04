@@ -54,7 +54,14 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationMessage, setValidationMessage] = useState('')
   
-  const form = useForm<DecimoTerceiroInput>({
+  // Helper para converter valores de forma segura
+  const convertToNumber = (value: unknown): number => {
+    if (typeof value === 'number') return value
+    if (typeof value === 'string') return parseFloat(value) || 0
+    return 0
+  }
+
+  const form = useForm({
     resolver: zodResolver(decimoTerceiroSchema),
     defaultValues: {
       salarioMensal: 0,
@@ -163,8 +170,8 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
               onSelectCalculation={(calc) => {
                 // Preencher formulário com inputs salvos
                 const inputs = calc.inputs || {}
-                form.setValue('salarioMensal', inputs.salarioMensal || 0)
-                form.setValue('mesesTrabalhados', inputs.mesesTrabalhados || 12)
+                form.setValue('salarioMensal', convertToNumber(inputs.salarioMensal || 0))
+                form.setValue('mesesTrabalhados', convertToNumber(inputs.mesesTrabalhados || 12))
                 
                 // Usar os outputs DIRETO do banco via CalculationParser
                 const parsedData = CalculationParser.parseByType(calc)
@@ -241,7 +248,7 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
                     placeholder="0,00"
                     value={form.watch('salarioMensal') || 0}
                     onChange={(value) => {
-                      form.setValue('salarioMensal', value || undefined as any)
+                      form.setValue('salarioMensal', value || 0)
                       handleInputChange()
                     }}
                     onInputChange={handleInputChange}

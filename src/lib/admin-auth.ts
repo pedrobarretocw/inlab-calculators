@@ -89,20 +89,22 @@ export async function requireAdminAccess(): Promise<AdminAuthResult> {
  * Usado em API routes para verificação server-side
  */
 export function isCloudwalkEmail(email: string): boolean {
-  return email && email.endsWith('@cloudwalk.io')
+  return !!(email && email.endsWith('@cloudwalk.io'))
 }
 
 /**
  * Extrai email do sessionClaims do Clerk
  */
-export function extractEmailFromClaims(sessionClaims: any): string | null {
-  return sessionClaims?.email || null
+export function extractEmailFromClaims(sessionClaims: Record<string, unknown>): string | null {
+  const email = sessionClaims?.email
+  return typeof email === 'string' ? email : null
 }
 
 /**
  * Verifica se usuário é da instância admin baseado no JWT issuer
  */
-export function isFromAdminInstance(sessionClaims: any): boolean {
+export function isFromAdminInstance(sessionClaims: Record<string, unknown>): boolean {
   const adminInstanceId = process.env.NEXT_PUBLIC_CLERK_ADMIN_PUBLISHABLE_KEY?.split('_')[1]
-  return adminInstanceId && sessionClaims?.iss?.includes(adminInstanceId)
+  const iss = sessionClaims?.iss
+  return !!(adminInstanceId && typeof iss === 'string' && iss.includes(adminInstanceId))
 }

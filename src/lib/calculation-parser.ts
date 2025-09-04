@@ -2,14 +2,14 @@
 export interface SavedCalculation {
   id: string
   calculator_slug: string
-  inputs: Record<string, any>
-  outputs: Record<string, any>
+  inputs: Record<string, number | string | boolean>
+  outputs: Record<string, number | string | boolean | { [key: string]: number } | undefined>
   created_at: string
 }
 
 export class CalculationParser {
   // Parse universal de valores monetários brasileiros
-  static parseValue(value: any, fieldName?: string): number {
+  static parseValue(value: unknown, fieldName?: string): number {
     if (value === null || value === undefined) return 0
     if (typeof value === 'number') return isNaN(value) ? 0 : value
     

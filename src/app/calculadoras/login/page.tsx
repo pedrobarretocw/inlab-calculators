@@ -1,4 +1,9 @@
-import CustomAuthForm from '@/components/auth/CustomAuthForm'
+import dynamic from 'next/dynamic'
+
+const CustomAuthForm = dynamic(() => import('@/components/auth/CustomAuthForm'), {
+  ssr: false,
+  loading: () => <div className="min-h-screen flex items-center justify-center">Loading...</div>
+})
 
 export default function PublicLoginPage() {
   return (

@@ -34,7 +34,7 @@ export function usePublicAuth() {
       return { success: true, mode: 'signup' as const }
     } catch (signUpErr: unknown) {
       // Se usuário já existe, tentar sign-in
-      if ((signUpErr as any)?.errors?.[0]?.code === 'form_identifier_exists') {
+      if ((signUpErr as { errors?: Array<{ code: string }> })?.errors?.[0]?.code === 'form_identifier_exists') {
         try {
           const signInAttempt = await signIn.create({
             identifier: email,
@@ -111,7 +111,7 @@ export function usePublicAuth() {
       return { success: false, error: 'Código inválido' }
     } catch (err: unknown) {
       // Tratar erro de sessão existente
-      if ((err as any)?.errors?.[0]?.code === 'session_exists') {
+      if ((err as { errors?: Array<{ code: string }> })?.errors?.[0]?.code === 'session_exists') {
         return { success: true, alreadyAuthenticated: true }
       }
       
