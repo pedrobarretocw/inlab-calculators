@@ -1,3 +1,5 @@
+'use client'
+
 import dynamic from 'next/dynamic'
 
 const CustomAuthForm = dynamic(() => import('@/components/auth/CustomAuthForm'), {
