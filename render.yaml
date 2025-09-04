@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: inlab-calculators
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_APP_URL
+        fromService:
+          type: web
+          name: inlab-calculators
+          property: host
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: NEXT_PUBLIC_CLERK_ADMIN_PUBLISHABLE_KEY
+        sync: false
+      - key: CLERK_ADMIN_SECRET_KEY
+        sync: false
+      - key: CLERK_ADMIN_JWT_KEY
+        sync: false
+      - key: ENABLE_CLERK
+        value: "false"
+      - key: ACTIVECAMPAIGN_API_URL
+        sync: false
+      - key: ACTIVECAMPAIGN_API_KEY
+        sync: false
+      - key: ACTIVECAMPAIGN_LIST_ID
+        sync: false
+    autoDeploy: true
+    branch: main
+    rootDir: .
