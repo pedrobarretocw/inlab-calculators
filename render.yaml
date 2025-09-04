@@ -15,33 +15,25 @@ services:
           type: web
           name: inlab-calculators
           property: host
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_ANON_KEY
-        sync: false
-      - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
         sync: false
-      - key: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-        sync: false
-      - key: CLERK_SECRET_KEY
+      - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
       - key: NEXT_PUBLIC_CLERK_ADMIN_PUBLISHABLE_KEY
         sync: false
       - key: CLERK_ADMIN_SECRET_KEY
         sync: false
-      - key: CLERK_ADMIN_JWT_KEY
+      - key: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CLERK_SECRET_KEY
         sync: false
       - key: ENABLE_CLERK
-        value: "false"
-      - key: ACTIVECAMPAIGN_API_URL
-        sync: false
+        value: "true"
       - key: ACTIVECAMPAIGN_API_KEY
         sync: false
-      - key: ACTIVECAMPAIGN_LIST_ID
+      - key: ACTIVECAMPAIGN_BASE_URL
         sync: false
     autoDeploy: true
     branch: main
