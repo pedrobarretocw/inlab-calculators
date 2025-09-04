@@ -45,6 +45,7 @@ export const saveCalculationSchema = z.object({
   outputs: z.record(z.string(), z.unknown()),
   email: z.string().email(),
   sessionId: z.string(),
+  name: z.string().optional().nullable(),
 })
 
 // Tipos TypeScript derivados dos schemas

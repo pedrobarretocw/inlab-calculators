@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { CalculatorCardWrapper } from '@/components/ui/calculator-card-wrapper'
+import { CalculationParser } from '@/lib/calculation-parser'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -23,7 +25,6 @@ import { InlineValidationError } from '@/components/ui/inline-validation-error'
 import { ViewSavedCalculationsButton } from './ViewSavedCalculationsButton'
 import { SavedCalculationsView } from './SavedCalculationsView'
 import { useCalculationResult } from '@/hooks/useCalculationResult'
-import { CalculationParser } from '@/lib/calculation-parser'
 import { useCalculator } from '@/contexts/CalculatorContext'
 import { useUser } from '@clerk/nextjs'
 import { PublicLoginModal } from '@/components/auth/PublicLoginModal'
@@ -138,8 +139,8 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
     return (
       <TooltipProvider>
         <div className="relative w-full max-w-lg">
-          <Card className={`w-full shadow-lg border border-gray-400 rounded-2xl overflow-hidden transition-opacity duration-300 ${fadeClass}`} style={{ backgroundColor: '#F5F5F5' }}>
-                        <SavedCalculationsView
+          <CalculatorCardWrapper fadeClass={fadeClass}>
+            <SavedCalculationsView
 
               onBack={() => {
                 // Animação de fade-out
@@ -160,13 +161,18 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
                 showHome()
               }}
               onSelectCalculation={(calc) => {
-                // SOLID: Responsabilidade única - apenas parse e delegação
+                // Preencher formulário com inputs salvos
+                const inputs = calc.inputs || {}
+                form.setValue('salarioMensal', inputs.salarioMensal || 0)
+                form.setValue('mesesTrabalhados', inputs.mesesTrabalhados || 12)
+                
+                // Usar os outputs DIRETO do banco via CalculationParser
                 const parsedData = CalculationParser.parseByType(calc)
                 calculationResult.setSavedCalculation(parsedData, calc.calculator_slug)
                 setShowSavedCalculations(false)
               }}
             />
-          </Card>
+          </CalculatorCardWrapper>
         </div>
       </TooltipProvider>
     )
@@ -184,7 +190,7 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
           showImage={true}
         />
         
-        <Card className={`quiz-snake-border w-full shadow-lg rounded-2xl overflow-hidden transition-opacity duration-300 ${fadeClass}`}>
+        <CalculatorCardWrapper fadeClass={fadeClass}>
           {/* Toast Containers */}
           <InlineToastContainer />
           <CalculatorErrorToastContainer />
@@ -271,7 +277,7 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
                   />
                 </div>
 
-                <div className="space-y-2 pt-1">
+                <div className="space-y-2 pt-9">
                   {/* Botão Calcular centralizado */}
                   <div className="flex justify-center">
                     <Button 
@@ -301,7 +307,7 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
               </form>
             </Form>
           </CardContent>
-        </Card>
+        </CalculatorCardWrapper>
 
         {/* Modal de Login Simplificado */}
         {showEmailCapture && (
@@ -337,7 +343,7 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
           results={calculationResult.getFormattedResults()}
           onReset={handleReset}
           isVisible={calculationResult.isVisible}
-          calculatorType="13o-salario"
+          calculatorType={calculationResult.result.isFromSaved ? calculationResult.result.savedType : "13o-salario"}
           calculationData={form.getValues()}
           onShowSavedCalculations={() => setShowSavedCalculations(true)}
           onShowCalculatorHome={() => showHome()}

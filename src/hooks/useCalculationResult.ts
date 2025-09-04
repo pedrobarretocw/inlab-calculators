@@ -47,8 +47,17 @@ export function useCalculationResult(currentCalculatorType: string) {
     const finalType = typeToFormat || currentCalculatorType
     
     // Formatando resultado do cálculo
+    const formattedResults = ResultFormatter.formatByType(finalType, result.data)
     
-    return ResultFormatter.formatByType(finalType, result.data)
+    // DEBUG SÓ SE DEU PROBLEMA
+    if (formattedResults.some(f => f.value === 'R$ 0,00')) {
+      console.log('🚨 PROBLEMA: Valores zerados!')
+      console.log('finalType:', finalType)
+      console.log('result.data:', result.data)
+      console.log('formattedResults:', formattedResults)
+    }
+    
+    return formattedResults
   }
 
   return {

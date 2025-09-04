@@ -69,10 +69,8 @@ function EmbedABContent({ articleSlug }: EmbedABProps) {
   
   if (loading) {
     return (
-      <div className="w-full max-w-[500px] max-h-[500px] overflow-auto">
-        <div className="flex items-center justify-center h-40">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
+      <div className="w-full max-w-lg h-[500px] max-h-[500px] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     )
   }
@@ -119,7 +117,7 @@ function EmbedABContent({ articleSlug }: EmbedABProps) {
   }
   
   return (
-    <div className="w-full max-w-[500px] max-h-[500px] overflow-auto p-4">
+    <div className="w-full max-w-lg h-[500px] max-h-[500px] flex items-center justify-center">
       {renderCalculator()}
     </div>
   )

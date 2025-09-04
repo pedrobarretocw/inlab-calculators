@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     }
     const supabase = await createServiceRoleClient()
     
-    // Get data for the last 30 days
+    // Get data for the last 30 days (to ensure we have some data)
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
     
@@ -32,16 +32,16 @@ export async function GET(req: NextRequest) {
     const eventsByDay: Record<string, { views: number; calculations: number; conversions: number }> = {}
     
     // Initialize all days with 0 counts
-    for (let i = 29; i >= 0; i--) {
+    for (let i = 6; i >= 0; i--) {
       const date = startOfDay(subDays(new Date(), i))
-      const dateKey = format(date, 'MM/dd')
+      const dateKey = format(date, 'dd/MM')
       eventsByDay[dateKey] = { views: 0, calculations: 0, conversions: 0 }
     }
     
     // Count events by day and type
     events.forEach(event => {
       const eventDate = new Date(event.created_at)
-      const dateKey = format(eventDate, 'MM/dd')
+      const dateKey = format(eventDate, 'dd/MM')
       
       if (eventsByDay[dateKey]) {
         switch (event.event) {

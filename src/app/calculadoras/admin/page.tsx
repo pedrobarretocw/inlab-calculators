@@ -2,7 +2,6 @@ import { Suspense } from 'react'
 import { KPICards } from '@/components/dashboard/KPICards'
 import { EventsChart } from '@/components/dashboard/EventsChart'
 import { TopCalculators } from '@/components/dashboard/TopCalculators'
-import { ABTestReport } from '@/components/dashboard/ABTestReport'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -81,24 +80,6 @@ function CalculatorsTab() {
           </CardContent>
         </Card>
         
-        {/* Carousel */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Carousel Embed</CardTitle>
-            <CardDescription>
-              Embed all calculators in a beautiful carousel
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <h3 className="font-medium">All Calculators (Carousel)</h3>
-                <p className="text-sm text-muted-foreground">Interactive carousel with all calculators and navigation</p>
-              </div>
-              <CalculatorModal calculatorSlug="carousel" calculatorName="Carousel" embedType="carousel" />
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )
@@ -219,7 +200,7 @@ export default async function AdminPage() {
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="analytics" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Analytics
@@ -227,14 +208,6 @@ export default async function AdminPage() {
             <TabsTrigger value="calculators" className="flex items-center gap-2">
               <Calculator className="h-4 w-4" />
               Calculators
-            </TabsTrigger>
-            <TabsTrigger value="ab-tests" className="flex items-center gap-2">
-              <TestTube className="h-4 w-4" />
-              A/B Tests
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Settings
             </TabsTrigger>
           </TabsList>
           
@@ -249,20 +222,16 @@ export default async function AdminPage() {
               <KPICards />
             </Suspense>
             
-            {/* Chart */}
-            <Suspense fallback={<div>Loading chart...</div>}>
-              <EventsChart />
-            </Suspense>
-            
+            {/* Chart and Top Calculators lado a lado */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Chart */}
+              <Suspense fallback={<div>Loading chart...</div>}>
+                <EventsChart />
+              </Suspense>
+              
               {/* Top Calculators */}
               <Suspense fallback={<div>Loading calculators...</div>}>
                 <TopCalculators />
-              </Suspense>
-              
-              {/* A/B Test Report */}
-              <Suspense fallback={<div>Loading A/B report...</div>}>
-                <ABTestReport />
               </Suspense>
             </div>
           </TabsContent>

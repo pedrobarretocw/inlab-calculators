@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { CalculatorCardWrapper } from '@/components/ui/calculator-card-wrapper'
+import { CalculationParser } from '@/lib/calculation-parser'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -23,7 +25,6 @@ import { InlineValidationError } from '@/components/ui/inline-validation-error'
 import { ViewSavedCalculationsButton } from './ViewSavedCalculationsButton'
 import { SavedCalculationsView } from './SavedCalculationsView'
 import { useCalculationResult } from '@/hooks/useCalculationResult'
-import { CalculationParser } from '@/lib/calculation-parser'
 import { useCalculator } from '@/contexts/CalculatorContext'
 import { useUser } from '@clerk/nextjs'
 import { PublicLoginModal } from '@/components/auth/PublicLoginModal'
@@ -55,7 +56,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
   const [validationMessage, setValidationMessage] = useState('')
   
   const form = useForm<FeriasInput>({
-    resolver: zodResolver(feriasSchema),
+    resolver: zodResolver(feriasSchema) as any,
     defaultValues: {
       salarioMensal: undefined as any, // Para forçar validação
       mesesTrabalhados: 12,
@@ -141,7 +142,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
     return (
       <TooltipProvider>
         <div className="relative w-full max-w-lg">
-          <Card className={`w-full shadow-lg border border-gray-400 rounded-2xl overflow-hidden transition-opacity duration-300 ${fadeClass}`} style={{ backgroundColor: '#F5F5F5' }}>
+          <CalculatorCardWrapper fadeClass={fadeClass}>
             <SavedCalculationsView 
 
               onBack={() => {
@@ -162,125 +163,19 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
               }}
               onSelectCalculation={(calc) => {
                 
-                // Preencher os dados do formulário com os dados salvos
+                // Preencher formulário com inputs salvos
                 const inputs = calc.inputs || {}
                 form.setValue('salarioMensal', inputs.salarioMensal || 0)
                 form.setValue('mesesTrabalhados', inputs.mesesTrabalhados || 12)
-                form.setValue('diasVendidos', inputs.diasVendidos || 0)
+                form.setValue('diasFerias', inputs.diasFerias || 30)
                 
-                // Ir direto para a tela de resultado com os dados salvos
-                const outputs = calc.outputs || {}
-                
-                // Converter strings para números e tratar NaN
-                const parseValue = (value: any, fieldName?: string) => {
-                  
-                  if (value === null || value === undefined) return 0
-                  if (typeof value === 'number') return isNaN(value) ? 0 : value
-                  if (typeof value === 'string') {
-                    // Se já está formatado como moeda brasileira, tratar isso
-                    if (value.includes('R$')) {
-                      // Exemplo: "R$ 2.472,22" ou "- R$ 110,00" -> "2472.22" ou "-110.00"
-                      // Remove R$ e espaços, depois converte formato brasileiro para americano
-                      let cleaned = value.replace(/R\$\s?/g, '').trim()
-                      
-                      // Verificar se tem sinal negativo
-                      const isNegative = cleaned.startsWith('-') || value.startsWith('-')
-                      if (isNegative) {
-                        cleaned = cleaned.replace(/^-\s*/, '') // Remove o sinal de menos
-                      }
-                      
-                      // Se tem ponto E vírgula (formato brasileiro: 1.234,56)
-                      if (cleaned.includes('.') && cleaned.includes(',')) {
-                        // Remove pontos (separadores de milhar) e troca vírgula por ponto
-                        cleaned = cleaned.replace(/\./g, '').replace(',', '.')
-                      } 
-                      // Se tem apenas vírgula (formato brasileiro: 123,45)
-                      else if (cleaned.includes(',') && !cleaned.includes('.')) {
-                        cleaned = cleaned.replace(',', '.')
-                      }
-                      // Se tem apenas ponto (formato americano: 123.45) - mantém
-                      
-                      let parsed = parseFloat(cleaned)
-                      if (isNegative) {
-                        parsed = -parsed // Aplica o sinal negativo
-                      }
-                      
-                      // Valor parseado com sucesso
-                      return isNaN(parsed) ? 0 : parsed
-                    }
-                    // Caso contrário, apenas converter
-                    const parsed = parseFloat(value)
-                    return isNaN(parsed) ? 0 : parsed
-                  }
-                  return 0
-                }
-                
-                // Processar qualquer tipo de cálculo - mapeamento dinâmico baseado no tipo
-                
-                // Mapeamento dinâmico baseado no tipo de cálculo
-                let resultData: any
-                
-                if (calc.calculator_slug === 'ferias') {
-                  // Mapear para FeriasResult
-                  resultData = {
-                    valorProporcional: parseValue(outputs['Valor Proporcional'], 'valorProporcional'),
-                    adicionalUmTerco: parseValue(outputs['Adicional 1/3'], 'adicionalUmTerco'),
-                    valorLiquido: parseValue(outputs['Total Líquido'], 'valorLiquido'),
-                    valorBruto: parseValue(outputs['Valor Proporcional'], 'valorBruto'),
-                    desconto: 0,
-                    diasFerias: inputs.diasFerias || 30,
-                    mesesTrabalhados: inputs.mesesTrabalhados || 12,
-                    observacao: ''
-                  }
-                } else if (calc.calculator_slug === '13o-salario') {
-                  // Mapear cálculo de 13º para interface de férias (adaptação)
-                  resultData = {
-                    valorProporcional: parseValue(
-                      outputs['Valor Proporcional'] ||
-                      outputs['valorProporcional'], 
-                      'valorProporcional'
-                    ),
-                    adicionalUmTerco: parseValue(
-                      outputs['1ª Parcela (até 30/11)'] ||
-                      outputs['primeiraParcela'], 
-                      'adicionalUmTerco'
-                    ), // Usar primeira parcela como adicional
-                    valorLiquido: parseValue(
-                      outputs['Valor Líquido Estimado'] ||
-                      outputs['Total Líquido'] ||
-                      outputs['valorLiquido'], 
-                      'valorLiquido'
-                    ),
-                    valorBruto: parseValue(
-                      outputs['Valor Proporcional'] ||
-                      outputs['valorProporcional'], 
-                      'valorBruto'
-                    ),
-                    desconto: 0,
-                    diasFerias: 30,
-                    mesesTrabalhados: inputs.mesesTrabalhados || 12,
-                    observacao: 'Cálculo de 13º Salário adaptado'
-                  }
-                } else {
-                  // Fallback para outros tipos
-                  resultData = {
-                    valorProporcional: 0,
-                    adicionalUmTerco: 0,
-                    valorLiquido: 0,
-                    valorBruto: 0,
-                    desconto: 0,
-                    diasFerias: 30,
-                    mesesTrabalhados: 12,
-                    observacao: `Tipo ${calc.calculator_slug} não suportado`
-                  }
-                }
-                
-                // Resultado parseado com sucesso
-                calculationResult.setSavedCalculation(resultData, calc.calculator_slug)
+                // Usar os outputs DIRETO do banco via CalculationParser
+                const parsedData = CalculationParser.parseByType(calc)
+                calculationResult.setSavedCalculation(parsedData, calc.calculator_slug)
                 setShowSavedCalculations(false)
               }}
             />
-          </Card>
+          </CalculatorCardWrapper>
         </div>
       </TooltipProvider>
     )
@@ -298,7 +193,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
           showImage={true}
         />
         
-        <Card className={`quiz-snake-border w-full shadow-lg rounded-2xl overflow-hidden transition-opacity duration-300 ${fadeClass}`}>
+        <CalculatorCardWrapper fadeClass={fadeClass}>
           {/* Toast Containers */}
           <InlineToastContainer />
           <CalculatorErrorToastContainer />
@@ -306,12 +201,12 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
           {/* Back Button removido */}
 
           
-          <CardHeader className="pb-1 px-6 pt-1">
+          <CardHeader className="pb-2 px-6 pt-2">
             <CardTitle className="text-lg font-medium text-gray-900 flex items-center justify-center gap-2">
               <span>🏖️</span>
               Calculadora de Férias
             </CardTitle>
-            <CardDescription className="text-center text-sm text-gray-600 mt-1">
+            <CardDescription className="text-center text-sm text-gray-600 mt-0.5">
               Calcule suas férias de forma rápida e fácil
             </CardDescription>
             
@@ -329,9 +224,9 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
             </div>
           </CardHeader>
           
-          <CardContent className="px-6 pb-4 pt-1">
+          <CardContent className="px-6 pb-3 pt-1">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-5">
+              <form onSubmit={form.handleSubmit(onSubmit as any, onError)} className="space-y-4">
                 {/* Campo de Salário - Minimalista */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -416,7 +311,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                   </div>
                 </div>
 
-                <div className="space-y-2 pt-1">
+                <div className="space-y-2 pt-9">
                   {/* Botão Calcular centralizado */}
                   <div className="flex justify-center">
                     <Button 
@@ -429,7 +324,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                   </div>
                   
                   {/* Texto clicável para outras calculadoras */}
-                  <div className="flex justify-center mt-4">
+                  <div className="flex justify-center mt-3">
                     <button
                       type="button"
                       onClick={() => {
@@ -446,7 +341,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
               </form>
             </Form>
           </CardContent>
-        </Card>
+        </CalculatorCardWrapper>
 
         {/* Modal de Login Simplificado */}
         {showEmailCapture && (
@@ -482,7 +377,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
           results={calculationResult.getFormattedResults()}
           onReset={() => calculationResult.reset()}
           isVisible={calculationResult.isVisible}
-          calculatorType="ferias"
+          calculatorType={calculationResult.result.isFromSaved ? calculationResult.result.savedType : "ferias"}
           calculationData={form.getValues()}
           onShowSavedCalculations={() => setShowSavedCalculations(true)}
               

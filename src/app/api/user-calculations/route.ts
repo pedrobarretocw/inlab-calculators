@@ -23,5 +23,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch calculations' }, { status: 500 })
   }
 
+          // Logs removidos para limpar console
+
   return NextResponse.json({ calculations })
 }

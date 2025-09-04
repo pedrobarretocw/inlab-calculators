@@ -30,6 +30,8 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
   const { user, isLoaded } = usePublicAuth()
   const { signOut, setActive } = useClerk()
   const { showHome, savedCalculations, loadingSavedCalculations, refreshSavedCalculations, deleteCalculation } = useCalculator()
+  
+  // Dados dos cálculos salvos vêm do contexto
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showLogoutMenu, setShowLogoutMenu] = useState(false)
 
@@ -135,17 +137,19 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
     }
     
     try {
-      // Remover do estado rapidamente para os cards subirem
-      setTimeout(() => {
-        deleteCalculation(calculationId)
-      }, 150) // Remove bem cedo, enquanto ainda está animando
+      // Chamar a função de delete diretamente
+      await deleteCalculation(calculationId)
       
     } catch (error) {
       console.error('Erro ao deletar cálculo:', error)
-      // Reverter o efeito visual se houver erro
+      
+      // Reverter a animação se der erro
       if (cardElement) {
         cardElement.classList.remove('calculation-delete')
       }
+      
+      // Mostrar uma mensagem de erro simples
+      alert('Erro ao deletar cálculo. Tente novamente.')
     }
   }
 
@@ -166,8 +170,7 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
   if (loadingSavedCalculations) {
     return (
       <div 
-        className="flex items-center justify-center pt-8 animate-in fade-in-0 duration-300 overflow-hidden"
-        style={{ backgroundColor: '#F5F5F5' }}
+        className="flex items-center justify-center h-full w-full animate-in fade-in-0 duration-300"
       >
         <div className="text-center animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-100">
           {/* Spinner Apple style */}
@@ -192,11 +195,10 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
 
   return (
     <div 
-      className="flex flex-col animate-in fade-in-0 slide-in-from-right-4 duration-500 relative overflow-hidden"
-      style={{ backgroundColor: '#F5F5F5' }}
+      className="flex flex-col h-full w-full animate-in fade-in-0 slide-in-from-right-4 duration-500 relative"
     >
       {/* Header centralizado */}
-      <div className="flex-shrink-0 px-4 py-2 border-b border-gray-300 relative">
+      <div className="flex-shrink-0 px-12 py-2 border-b border-gray-200 relative min-h-[48px]">
         <Button
           variant="ghost"
           size="sm"
@@ -242,7 +244,7 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
                             {showLogoutMenu && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute right-0 top-7 bg-white border border-gray-300 rounded-lg py-2 px-1 min-w-48 z-[999999]"
+                  className="absolute right-0 top-7 bg-white border border-gray-300 rounded-lg py-2 px-1 min-w-[160px] z-[999999]"
                   style={{
                     boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
                     zIndex: 999999
@@ -266,7 +268,7 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
       </div>
 
       {/* Content com scroll */}
-      <div className="flex-1 overflow-y-auto px-4 pb-12 pt-3">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 pb-4 pt-3">
         {savedCalculations.length === 0 ? (
           <div className="text-center py-8">
             {!user ? (
@@ -276,7 +278,7 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
                   Faça login/cadastro para ver e salvar os seus cálculos
                 </p>
 
-                <div className="w-full max-w-sm mx-auto mb-6 animate-in fade-in-0 duration-300 delay-200">
+                <div className="w-full max-w-xs mx-auto mb-6 animate-in fade-in-0 duration-300 delay-200">
                   <SimpleLoginForm
                     onSuccess={handleLoginSuccess}
                   />
@@ -306,11 +308,11 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
             )}
           </div>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-2">
             {savedCalculations.map((calc, index) => (
                 <div
                   key={calc.id} 
-                  className="calculation-card group relative bg-white hover:bg-gray-100 hover:border hover:border-gray-400 cursor-pointer transition-all duration-200 animate-in fade-in-0 slide-in-from-bottom-2 border border-transparent rounded-lg"
+                  className="calculation-card group relative bg-white hover:bg-gray-50 cursor-pointer transition-all duration-200 animate-in fade-in-0 slide-in-from-bottom-2 border border-gray-200 hover:border-gray-300 rounded-lg overflow-hidden mx-1"
                   style={{ 
                     animationDelay: `${index * 50}ms`,
                     animationDuration: '400ms',
@@ -320,7 +322,7 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
                 >
                   <div className="px-4 py-3 flex items-center gap-3">
                     {/* Avatar/Icon */}
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-lg flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-lg flex-shrink-0">
                       {getCalculatorIcon(calc.calculator_slug)}
                     </div>
                     

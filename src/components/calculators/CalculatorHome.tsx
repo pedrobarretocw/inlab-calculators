@@ -43,7 +43,7 @@ const calculatorOptions: CalculatorOption[] = [
 export function CalculatorHome({ onSelectCalculator }: CalculatorHomeProps) {
   return (
     <div 
-      className="quiz-snake-border h-[480px] flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-500 rounded-lg"
+      className="quiz-snake-border h-full max-h-[480px] flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-500 rounded-lg"
     >
       {/* Header */}
       <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60">
@@ -71,7 +71,7 @@ export function CalculatorHome({ onSelectCalculator }: CalculatorHomeProps) {
             >
               <div className="flex items-center gap-4 p-3 rounded-xl bg-white/70 hover:bg-white/90 border border-gray-200/50 hover:border-gray-300/70 transition-all duration-200 hover:shadow-sm">
                 {/* Emoji Icon */}
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${calc.gradient} flex items-center justify-center text-xl shadow-sm group-hover:scale-105 transition-transform duration-200`}>
+                <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center text-xl shadow-sm group-hover:scale-105 transition-transform duration-200">
                   {calc.emoji}
                 </div>
                 

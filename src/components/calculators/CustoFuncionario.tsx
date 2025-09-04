@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { CalculatorCardWrapper } from '@/components/ui/calculator-card-wrapper'
+import { CalculationParser } from '@/lib/calculation-parser'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -22,7 +24,6 @@ import { InlineValidationError } from '@/components/ui/inline-validation-error'
 import { ViewSavedCalculationsButton } from './ViewSavedCalculationsButton'
 import { SavedCalculationsView } from './SavedCalculationsView'
 import { useCalculationResult } from '@/hooks/useCalculationResult'
-import { CalculationParser } from '@/lib/calculation-parser'
 import { useCalculator } from '@/contexts/CalculatorContext'
 import { useUser } from '@clerk/nextjs'
 import { PublicLoginModal } from '@/components/auth/PublicLoginModal'
@@ -145,7 +146,7 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
     return (
       <TooltipProvider>
         <div className="relative w-full max-w-lg">
-          <Card className={`w-full shadow-lg border border-gray-400 rounded-2xl overflow-hidden transition-opacity duration-300 ${fadeClass}`} style={{ backgroundColor: '#F5F5F5' }}>
+          <CalculatorCardWrapper fadeClass={fadeClass}>
             <SavedCalculationsView 
               onBack={() => {
                 // Animação de fade-out
@@ -166,17 +167,21 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
                 showHome()
               }}
               onSelectCalculation={(calc) => {
-                // Parse dos dados salvos
+                // Preencher formulário com inputs salvos
+                const inputs = calc.inputs || {}
+                form.setValue('salarioBase', inputs.salarioBase || 0)
+                form.setValue('valeRefeicao', inputs.valeRefeicao || 0)
+                form.setValue('valeTransporte', inputs.valeTransporte || 0)
+                form.setValue('planoSaude', inputs.planoSaude || 0)
+                form.setValue('outrosBeneficios', inputs.outrosBeneficios || 0)
+                
+                // Usar os outputs DIRETO do banco via CalculationParser
                 const parsedData = CalculationParser.parseByType(calc)
-                
-                // Definir como cálculo salvo no hook
                 calculationResult.setSavedCalculation(parsedData, calc.calculator_slug)
-                
-                // Fechar tela de salvos
                 setShowSavedCalculations(false)
               }}
             />
-          </Card>
+          </CalculatorCardWrapper>
         </div>
       </TooltipProvider>
     )
@@ -194,14 +199,14 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
           showImage={true}
         />
         
-        <Card className={`quiz-snake-border w-full shadow-lg rounded-2xl overflow-hidden transition-opacity duration-300 ${fadeClass}`} style={{ maxHeight: '500px' }}>
+        <CalculatorCardWrapper fadeClass={fadeClass}>
           {/* Toast Containers */}
           <InlineToastContainer />
           <CalculatorErrorToastContainer />
           
           {/* Back Button removido */}
           
-          <CardHeader className="pb-1 px-4 pt-1" style={{ backgroundColor: 'transparent' }}>
+          <CardHeader className="pb-2 px-4 pt-2" style={{ backgroundColor: 'transparent' }}>
             <CardTitle className="text-base font-medium text-gray-900 flex items-center justify-center gap-2">
               <span>👥</span>
               Calculadora de Custo do Funcionário
@@ -211,7 +216,7 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
             </CardDescription>
             
             {/* Botão Ver Cálculos Salvos abaixo da descrição - sempre visível */}
-            <div className="flex justify-center mt-0.5">
+            <div className="flex justify-center mt-1">
               <button
                 onClick={() => {
                   setShowSavedCalculations(true)
@@ -224,18 +229,18 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
             </div>
           </CardHeader>
         
-          <CardContent className="px-4 pb-2 pt-0" style={{ backgroundColor: 'transparent' }}>
+          <CardContent className="px-4 pb-3 pt-1" style={{ backgroundColor: 'transparent' }}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-3">
                 {/* Campo de Salário Base */}
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm font-medium text-gray-700">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <label className="text-xs font-medium text-gray-700">
                       Salário Base
                     </label>
                     <Tooltip>
                       <TooltipTrigger>
-                        <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                        <InfoIcon className="h-3 w-3 text-gray-400 hover:text-gray-600 transition-colors" />
                       </TooltipTrigger>
                       <TooltipContent className="bg-white text-black border border-gray-200 shadow-lg max-w-48" sideOffset={5}>
                         <p>O salário mensal bruto do funcionário</p>
@@ -255,17 +260,17 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
                 </div>
 
                 {/* Benefícios em grid 2x2 */}
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-3">
                     {/* Vale Refeição */}
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-gray-700">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1">
+                        <label className="text-xs font-medium text-gray-700">
                           Vale Refeição
                         </label>
                         <Tooltip>
                           <TooltipTrigger>
-                            <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                            <InfoIcon className="h-3 w-3 text-gray-400 hover:text-gray-600 transition-colors" />
                           </TooltipTrigger>
                           <TooltipContent className="bg-white text-black border border-gray-200 shadow-lg max-w-48" sideOffset={5}>
                             <p>Valor mensal do vale refeição</p>
@@ -285,14 +290,14 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
                     </div>
 
                     {/* Vale Transporte */}
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-gray-700">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1">
+                        <label className="text-xs font-medium text-gray-700">
                           Vale Transporte
                         </label>
                         <Tooltip>
                           <TooltipTrigger>
-                            <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                            <InfoIcon className="h-3 w-3 text-gray-400 hover:text-gray-600 transition-colors" />
                           </TooltipTrigger>
                           <TooltipContent className="bg-white text-black border border-gray-200 shadow-lg max-w-48" sideOffset={5}>
                             <p>Valor mensal do vale transporte</p>
@@ -314,14 +319,14 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
 
                   <div className="grid grid-cols-2 gap-4">
                     {/* Plano de Saúde */}
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-gray-700">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1">
+                        <label className="text-xs font-medium text-gray-700">
                           Plano de Saúde
                         </label>
                         <Tooltip>
                           <TooltipTrigger>
-                            <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                            <InfoIcon className="h-3 w-3 text-gray-400 hover:text-gray-600 transition-colors" />
                           </TooltipTrigger>
                           <TooltipContent className="bg-white text-black border border-gray-200 shadow-lg max-w-48" sideOffset={5}>
                             <p>Valor mensal do plano de saúde</p>
@@ -341,14 +346,14 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
                     </div>
 
                     {/* Outros Benefícios */}
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-gray-700">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1">
+                        <label className="text-xs font-medium text-gray-700">
                           Outros Benefícios
                         </label>
                         <Tooltip>
                           <TooltipTrigger>
-                            <InfoIcon className="h-4 w-4 text-gray-400 hover:text-gray-600 transition-colors" />
+                            <InfoIcon className="h-3 w-3 text-gray-400 hover:text-gray-600 transition-colors" />
                           </TooltipTrigger>
                           <TooltipContent className="bg-white text-black border border-gray-200 shadow-lg max-w-48" sideOffset={5}>
                             <p>Outros benefícios ou auxílios mensais</p>
@@ -370,7 +375,7 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
                 </div>
 
                 {/* Botão Calcular centralizado */}
-                <div className="flex justify-center mt-2">
+                <div className="flex justify-center mt-8">
                   <Button 
                     type="submit" 
                     className="max-w-[160px] px-6 py-2 text-sm font-medium text-black"
@@ -397,7 +402,7 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
               </form>
             </Form>
           </CardContent>
-        </Card>
+        </CalculatorCardWrapper>
 
         {/* Overlay de Resultados */}
         <CalculationResult
@@ -405,7 +410,7 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
           results={calculationResult.getFormattedResults()}
           onReset={() => calculationResult.reset()}
           isVisible={calculationResult.isVisible}
-          calculatorType="custo-funcionario"
+          calculatorType={calculationResult.result.isFromSaved ? calculationResult.result.savedType : "custo-funcionario"}
           calculationData={form.getValues()}
           onShowSavedCalculations={() => setShowSavedCalculations(true)}
           onShowCalculatorHome={() => showHome()}

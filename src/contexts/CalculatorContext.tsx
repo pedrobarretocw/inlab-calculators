@@ -71,6 +71,7 @@ export function CalculatorProvider({ children, initialCalculator }: CalculatorPr
         const data = await response.json()
         setSavedCalculations(data.calculations)
       } else {
+        console.log('❌ CONTEXT: Erro na API, limpando dados')
         setSavedCalculations([])
       }
     } catch (error) {
@@ -120,12 +121,15 @@ export function CalculatorProvider({ children, initialCalculator }: CalculatorPr
       })
       
       if (response.ok) {
+        // Remove o cálculo da lista local
         setSavedCalculations(prev => prev.filter(calc => calc.id !== calculationId))
       } else {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(`Erro ao deletar cálculo: ${response.status}`)
+        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+        console.error('Erro ao deletar cálculo:', errorData)
+        throw new Error(errorData.error || `Erro ao deletar cálculo: ${response.status}`)
       }
     } catch (error) {
+      console.error('Erro inesperado ao deletar cálculo:', error)
       throw error
     }
   }

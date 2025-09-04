@@ -65,6 +65,10 @@ function CalculationResultContent({
   isFromSavedCalculation = false,
   savedCalculationType
 }: CalculationResultProps) {
+  
+  // LOG PARA DEBUG
+  // Logs removidos para limpar console
+  
   const { showHome, refreshSavedCalculations, addSavedCalculation } = useCalculator()
   const [showEmailCapture, setShowEmailCapture] = useState(false)
   const [actionType, setActionType] = useState<'save' | 'reset'>('save')
@@ -96,7 +100,10 @@ function CalculationResultContent({
     // Adicionar imediatamente no contexto (usuário vê na hora)
     addSavedCalculation(newCalculation)
     
-    // Fechar modal e ir direto para Meus Cálculos
+    // Pequeno delay para dar tempo do contexto atualizar
+    await new Promise(resolve => setTimeout(resolve, 300))
+    
+    // Fechar modal e ir para Meus Cálculos
     setShowEmailCapture(false)
     setCalculationName('')
     if (onShowSavedCalculations) {

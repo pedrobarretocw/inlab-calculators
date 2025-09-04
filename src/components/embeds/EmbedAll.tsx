@@ -45,7 +45,7 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
   if (isLoading) {
     return (
       <div className={`w-full max-w-lg mx-auto transition-opacity duration-300 ${fadeClass}`}>
-        <div className="h-[500px] max-h-[500px] overflow-hidden flex items-start justify-center pt-4">
+        <div className="h-[500px] max-h-[500px] flex items-center justify-center">
           <CalculatorSkeleton />
         </div>
       </div>
@@ -82,7 +82,7 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
   if (showCalculatorHome) {
     return (
       <div className={`w-full max-w-lg mx-auto transition-opacity duration-300 ${fadeClass}`}>
-        <div className="max-h-[500px] overflow-hidden pt-4">
+        <div className="h-[500px] max-h-[500px] flex items-center justify-center">
           <CalculatorHome onSelectCalculator={handleCalculatorSelect} />
         </div>
       </div>
@@ -93,7 +93,7 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
   if (selectedCalculator) {
     return (
       <div className={`w-full max-w-lg mx-auto transition-opacity duration-300 ${fadeClass}`}>
-        <div className="h-[500px] max-h-[500px] overflow-hidden flex items-start justify-center pt-4">
+        <div className="h-[500px] max-h-[500px] flex items-center justify-center">
           {selectedCalculator === 'ferias' && (
             <Ferias
               key="ferias-calculator"
@@ -137,7 +137,7 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
   // Renderizar CalculatorHome por padrão (sem carousel)
   return (
     <div className={`w-full max-w-lg mx-auto transition-opacity duration-300 ${fadeClass}`}>
-      <div className="max-h-[500px] overflow-hidden pt-4">
+      <div className="h-[500px] max-h-[500px] flex items-center justify-center">
         <CalculatorHome onSelectCalculator={handleCalculatorSelect} />
       </div>
     </div>

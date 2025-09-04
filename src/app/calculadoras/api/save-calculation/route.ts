@@ -10,6 +10,8 @@ export async function POST(request: NextRequest) {
     // Validate the request body
     const validatedData = saveCalculationSchema.parse(body)
     
+    console.log('🎯 CALCULADORAS SAVE CALCULATION - Nome recebido:', validatedData.name)
+    
     // Get user info (supports mock in development)
     const { userId } = await getCurrentUser()
     
@@ -28,6 +30,7 @@ export async function POST(request: NextRequest) {
         calculator_slug: validatedData.calculatorSlug,
         inputs: validatedData.inputs,
         outputs: validatedData.outputs,
+        name: validatedData.name || null,
         created_at: new Date().toISOString(),
       })
     )
