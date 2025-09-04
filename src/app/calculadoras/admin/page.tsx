@@ -18,8 +18,8 @@ function CalculatorsTab() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">View Calculators</h2>
-        <p className="text-gray-600 mt-2">Test and preview all available calculators</p>
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">View Calculators</h2>
+        <p className="text-sm sm:text-base text-gray-600 mt-2">Test and preview all available calculators</p>
       </div>
       
       <div className="space-y-4">
@@ -33,30 +33,36 @@ function CalculatorsTab() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-3">
+                <div className="min-w-0 flex-1">
                   <h3 className="font-medium">Vacation Calculator</h3>
                   <p className="text-sm text-muted-foreground">Calculate proportional vacation value with 1/3 bonus</p>
                 </div>
-                <CalculatorModal calculatorSlug="ferias" calculatorName="Vacation Calculator" embedType="single" />
+                <div className="flex-shrink-0">
+                  <CalculatorModal calculatorSlug="ferias" calculatorName="Vacation Calculator" embedType="single" />
+                </div>
               </div>
               
 
               
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-3">
+                <div className="min-w-0 flex-1">
                   <h3 className="font-medium">Employee Cost</h3>
                   <p className="text-sm text-muted-foreground">Calculate total employee cost including taxes</p>
                 </div>
-                <CalculatorModal calculatorSlug="custo-funcionario" calculatorName="Employee Cost" embedType="single" />
+                <div className="flex-shrink-0">
+                  <CalculatorModal calculatorSlug="custo-funcionario" calculatorName="Employee Cost" embedType="single" />
+                </div>
               </div>
               
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-3">
+                <div className="min-w-0 flex-1">
                   <h3 className="font-medium">13th Salary</h3>
                   <p className="text-sm text-muted-foreground">Calculate 13th salary proportional to months worked</p>
                 </div>
-                <CalculatorModal calculatorSlug="13o-salario" calculatorName="13th Salary" embedType="single" />
+                <div className="flex-shrink-0">
+                  <CalculatorModal calculatorSlug="13o-salario" calculatorName="13th Salary" embedType="single" />
+                </div>
               </div>
             </div>
           </CardContent>
@@ -202,20 +208,22 @@ export default async function AdminPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="analytics" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Analytics
+            <TabsTrigger value="analytics" className="flex items-center gap-1 sm:gap-2 text-sm">
+              <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Analytics</span>
+              <span className="sm:hidden">Charts</span>
             </TabsTrigger>
-            <TabsTrigger value="calculators" className="flex items-center gap-2">
-              <Calculator className="h-4 w-4" />
-              Calculators
+            <TabsTrigger value="calculators" className="flex items-center gap-1 sm:gap-2 text-sm">
+              <Calculator className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Calculators</span>
+              <span className="sm:hidden">Tools</span>
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="analytics" className="mt-8 space-y-8">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
-              <p className="text-gray-600 mt-2">Calculator performance and usage metrics</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-2">Calculator performance and usage metrics</p>
             </div>
             
             {/* KPIs */}

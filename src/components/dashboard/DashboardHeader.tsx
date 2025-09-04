@@ -18,13 +18,15 @@ export function DashboardHeader() {
     <header className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Dashboard - Calculadoras Trabalhistas
+          <div className="flex-shrink-0 min-w-0">
+            <h1 className="text-base sm:text-lg lg:text-2xl font-bold text-gray-900 truncate">
+              <span className="hidden lg:inline">Dashboard - Calculadoras Trabalhistas</span>
+              <span className="hidden sm:inline lg:hidden">Dashboard - Calculadoras</span>
+              <span className="sm:hidden">Dashboard</span>
             </h1>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 flex-shrink-0">
             {isClerkEnabled() ? (
               <UserButton 
                 afterSignOutUrl="/"
