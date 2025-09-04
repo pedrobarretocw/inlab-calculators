@@ -30,22 +30,18 @@ export function SimpleLoginForm({ onSuccess }: SimpleLoginFormProps) {
     }
 
     try {
-      console.log('[EmailSubmit] Iniciando processo de verificação')
       const result = await signInWithEmail(email)
       
       if (result && result.success) {
-        console.log('[EmailSubmit] Email enviado com sucesso')
         if (result.mode) {
           setAuthMode(result.mode)
         }
         setStep('code')
         toast.success('Código de verificação enviado para seu email!')
       } else {
-        console.error('[EmailSubmit] Erro ao enviar email:', result && result.error)
         toast.error((result && result.error) || 'Erro ao enviar código')
       }
     } catch (error) {
-      console.error('[EmailSubmit] Erro na requisição:', error)
       toast.error('Erro ao enviar código. Tente novamente.')
     }
   }
@@ -81,17 +77,14 @@ export function SimpleLoginForm({ onSuccess }: SimpleLoginFormProps) {
       const result = await signInWithEmail(email)
       
       if (result && result.success) {
-        console.log('[ResendCode] Código reenviado com sucesso')
         if (result.mode) {
           setAuthMode(result.mode)
         }
         toast.success('Novo código enviado para seu email!')
       } else {
-        console.error('[ResendCode] Erro ao reenviar:', result && result.error)
         toast.error((result && result.error) || 'Erro ao reenviar código')
       }
     } catch (error) {
-      console.error('[ResendCode] Erro na requisição:', error)
       toast.error('Erro ao reenviar código. Tente novamente.')
     } finally {
       setIsResending(false)

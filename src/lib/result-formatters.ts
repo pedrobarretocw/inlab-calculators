@@ -101,7 +101,6 @@ export class ResultFormatter {
 
 
   static formatByType(type: string, data: CalculationData): FormattedResult[] {
-    console.log('[ResultFormatter] formatByType:', { type, data })
     
     switch (type) {
       case 'ferias':
@@ -110,10 +109,8 @@ export class ResultFormatter {
         return this.formatDecimoTerceiro(data)
       case 'custo-funcionario':
         const result = this.formatCustoFuncionario(data)
-        console.log('[ResultFormatter] formatCustoFuncionario result:', result)
         return result
       default:
-        console.log('[ResultFormatter] Tipo não encontrado:', type)
         return []
     }
   }

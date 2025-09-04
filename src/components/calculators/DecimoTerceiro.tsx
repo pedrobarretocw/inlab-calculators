@@ -102,13 +102,10 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
   }
 
   const onError = async () => {
-    console.log('[DEBUG] onError called, errors:', form.formState.errors)
-    
     // Forçar validação antes de verificar erros
     await form.trigger()
     
     const errors = form.formState.errors
-    console.log('[DEBUG] Errors after trigger:', errors)
     
     if (Object.keys(errors).length > 0) {
       // Criar mensagem de erro
@@ -207,7 +204,6 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
             <div className="flex justify-center mt-1">
               <button
                 onClick={() => {
-                  console.log('[DecimoTerceiro] Ver cálculos salvos - indo direto')
                   setShowSavedCalculations(true)
                 }}
                 className="px-2 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-700"
@@ -292,7 +288,6 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
                     <button
                       type="button"
                       onClick={() => {
-                        console.log('[DecimoTerceiro] Navegando para outras calculadoras')
                         showHome()
                       }}
                       className="text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"

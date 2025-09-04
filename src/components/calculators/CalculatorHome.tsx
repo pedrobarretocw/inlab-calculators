@@ -41,7 +41,6 @@ const calculatorOptions: CalculatorOption[] = [
 ]
 
 export function CalculatorHome({ onSelectCalculator }: CalculatorHomeProps) {
-  console.log('[CalculatorHome] Componente renderizado!')
   return (
     <div 
       className="quiz-snake-border h-[480px] flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-500 rounded-lg"
@@ -61,7 +60,6 @@ export function CalculatorHome({ onSelectCalculator }: CalculatorHomeProps) {
             <button
               key={calc.id}
               onClick={() => {
-                console.log('[DEBUG] CalculatorHome - Clicando em:', calc.id, calc.name)
                 onSelectCalculator(calc.id)
               }}
               className="w-full group animate-in fade-in-0 slide-in-from-bottom-2"

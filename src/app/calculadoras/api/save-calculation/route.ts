@@ -5,13 +5,10 @@ import { getCurrentUser } from '@/lib/clerk'
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('[Save Calculation] Request received')
     const body = await request.json()
-    console.log('[Save Calculation] Request body:', body)
     
     // Validate the request body
     const validatedData = saveCalculationSchema.parse(body)
-    console.log('[Save Calculation] Data validated successfully')
     
     // Get user info (supports mock in development)
     const { userId } = await getCurrentUser()
@@ -29,7 +26,6 @@ export async function POST(request: NextRequest) {
         user_id: userId,
         email: validatedData.email,
         calculator_slug: validatedData.calculatorSlug,
-        name: validatedData.name,
         inputs: validatedData.inputs,
         outputs: validatedData.outputs,
         created_at: new Date().toISOString(),

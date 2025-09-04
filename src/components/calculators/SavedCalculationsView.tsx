@@ -52,7 +52,6 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
       // Carregar cálculos salvos quando usuário logar
       const userEmail = user.emailAddresses?.[0]?.emailAddress
       if (userEmail) {
-        console.log('[SavedCalculationsView] Usuário logado, carregando cálculos salvos para:', userEmail)
         refreshSavedCalculations(userEmail)
       }
     }
@@ -211,7 +210,6 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
           variant="ghost"
           size="sm"
           onClick={() => {
-            console.log('[SavedCalculationsView] Home button clicked')
             showHome()
           }}
           className="absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full hover:bg-gray-100 transition-colors"

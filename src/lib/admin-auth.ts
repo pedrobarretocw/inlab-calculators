@@ -79,11 +79,7 @@ export async function checkAdminAccess(): Promise<AdminAuthResult> {
 export async function requireAdminAccess(): Promise<AdminAuthResult> {
   const result = await checkAdminAccess()
   
-  if (!result.isAuthorized) {
-    console.warn('[AdminAuth] Acesso negado:', result.reason)
-  } else {
-    console.log(`[AdminAuth] Acesso autorizado para: ${result.email}`)
-  }
+  // Verificação de acesso admin concluída
   
   return result
 }

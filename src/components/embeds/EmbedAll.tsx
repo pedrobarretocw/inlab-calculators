@@ -20,13 +20,12 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
   const [isLoading, setIsLoading] = useState(true)
   const [hasInitialized, setHasInitialized] = useState(false)
   
-  console.log('[EmbedAll] Estado atual - selectedCalculator:', selectedCalculator, 'showCalculatorHome:', showCalculatorHome)
+  // Estado atual do componente
   
   // Inicialização apenas uma vez
   useEffect(() => {
     if (!hasInitialized) {
       if (initialCalculator) {
-        console.log('[EmbedAll] Primeira carga - selecionando calculadora inicial:', initialCalculator)
         selectCalculator(initialCalculator as any)
         setTimeout(() => {
           setIsLoading(false)
@@ -54,11 +53,11 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
   }
 
   const handleCalculate = (result: unknown) => {
-    console.log('Calculation result:', result)
+    // Calculation completed
   }
   
   const handleStart = () => {
-    console.log('User started calculation')
+    // User started calculation
   }
   
   const handleCalculatorSelect = (calculatorId: string) => {
@@ -81,7 +80,6 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
   
   // Renderizar CalculatorHome
   if (showCalculatorHome) {
-    console.log('[EmbedAll] Renderizando CalculatorHome')
     return (
       <div className={`w-full max-w-lg mx-auto transition-opacity duration-300 ${fadeClass}`}>
         <div className="max-h-[500px] overflow-hidden pt-4">

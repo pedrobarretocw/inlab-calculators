@@ -59,10 +59,7 @@ export class CalculationParser {
   static parseDecimoTerceiro(calc: SavedCalculation) {
     const { inputs, outputs } = calc
     
-    // Debug para ver o que está chegando
-    console.log('[CalculationParser] parseDecimoTerceiro - outputs:', outputs)
-    console.log('[CalculationParser] INSS bruto:', outputs['INSS estimado'])
-    console.log('[CalculationParser] INSS parseado:', this.parseValue(outputs['INSS estimado']))
+    // Parse dos dados de décimo terceiro
     
     return {
       valorProporcional: this.parseValue(outputs['Valor Proporcional']),
@@ -82,8 +79,7 @@ export class CalculationParser {
   static parseCustoFuncionario(calc: SavedCalculation) {
     const { inputs, outputs } = calc
     
-    // Debug para ver o que está chegando
-    console.log('[CalculationParser] parseCustoFuncionario - outputs:', outputs)
+    // Parse dos dados de custo do funcionário
     
     return {
       salarioBase: this.parseValue(outputs['Salário Base']),

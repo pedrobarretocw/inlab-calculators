@@ -59,26 +59,21 @@ export function CalculatorProvider({ children, initialCalculator }: CalculatorPr
   // Função para buscar cálculos salvos do banco
   const fetchSavedCalculations = async (userEmail?: string) => {
     if (!userEmail) {
-      console.log('[Context] Email não fornecido, limpando cálculos salvos')
       setSavedCalculations([])
       return
     }
     
     setLoadingSavedCalculations(true)
     try {
-      console.log('[Context] Buscando cálculos salvos para email:', userEmail)
       const response = await fetch(`/api/user-calculations?email=${encodeURIComponent(userEmail)}`)
       
       if (response.ok) {
         const data = await response.json()
-        console.log('[Context] Cálculos salvos carregados:', data.calculations.length, 'itens')
         setSavedCalculations(data.calculations)
       } else {
-        console.error('[Context] Erro ao buscar cálculos salvos:', response.status)
         setSavedCalculations([])
       }
     } catch (error) {
-      console.error('[Context] Erro na requisição:', error)
       setSavedCalculations([])
     } finally {
       setLoadingSavedCalculations(false)
@@ -89,64 +84,48 @@ export function CalculatorProvider({ children, initialCalculator }: CalculatorPr
   
   // Ações de navegação
   const selectCalculator = (calculatorId: CalculatorType) => {
-    console.log('[Context] Selecionando calculadora:', calculatorId)
     setSelectedCalculator(calculatorId)
     setShowCalculatorHome(false)
   }
   
   const showHome = () => {
-    console.log('[Context] Mostrando Calculator Home')
     setSelectedCalculator(null) // Limpa calculadora selecionada
     setShowCalculatorHome(true)
   }
   
   const hideHome = () => {
-    console.log('[Context] Escondendo Calculator Home')
     setShowCalculatorHome(false)
   }
   
   const navigateToCarousel = () => {
-    console.log('[Context] Navegando para carousel')
     setSelectedCalculator(null)
     setShowCalculatorHome(false)
   }
   
   // Ações de cálculos salvos
   const refreshSavedCalculations = async (userEmail?: string) => {
-    console.log('[Context] refreshSavedCalculations chamada - atualizando cálculos salvos para:', userEmail)
     await fetchSavedCalculations(userEmail)
   }
   
   const addSavedCalculation = (calculation: SavedCalculation) => {
-    console.log('[Context] Adicionando novo cálculo salvo:', calculation.id)
     setSavedCalculations(prev => [calculation, ...prev])
   }
   
   const deleteCalculation = async (calculationId: string) => {
-    console.log('[Context] Deletando cálculo:', calculationId)
-    console.log('[Context] Tipo do ID:', typeof calculationId)
-    console.log('[Context] ID codificado:', encodeURIComponent(calculationId))
-    
     try {
       const url = `/api/delete-calculation?id=${encodeURIComponent(calculationId)}`
-      console.log('[Context] URL da requisição:', url)
       
       const response = await fetch(url, {
         method: 'DELETE'
       })
       
-      console.log('[Context] Status da resposta:', response.status)
-      
       if (response.ok) {
-        console.log('[Context] Cálculo deletado com sucesso')
         setSavedCalculations(prev => prev.filter(calc => calc.id !== calculationId))
       } else {
         const errorData = await response.json().catch(() => ({}))
-        console.error('[Context] Erro ao deletar cálculo:', response.status, errorData)
         throw new Error(`Erro ao deletar cálculo: ${response.status}`)
       }
     } catch (error) {
-      console.error('[Context] Erro na requisição de deleção:', error)
       throw error
     }
   }

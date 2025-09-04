@@ -41,7 +41,6 @@ export function EventsChart() {
         
         // Check if API returned an error object
         if (eventData.error) {
-          console.log('[EventsChart] API returned error:', eventData.error)
           setData(dates) // Use mock data
           return
         }

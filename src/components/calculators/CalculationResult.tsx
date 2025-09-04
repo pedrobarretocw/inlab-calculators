@@ -147,15 +147,15 @@ function CalculationResultContent({
       }).then(async response => {
         const result = await response.json()
         if (result.success) {
-          console.log(`[ActiveCampaign] Email ${currentEmail} adicionado com sucesso (ID: ${result.contactId})`)
+          // Email adicionado com sucesso
         } else {
-          console.warn(`[ActiveCampaign] Falha ao adicionar email ${currentEmail}:`, result.message)
+          // Falha ao adicionar email
         }
       }).catch(error => {
-        console.error('[ActiveCampaign] Erro inesperado:', error)
+        // Erro inesperado ao adicionar no ActiveCampaign
       })
     } catch (error) {
-      console.error('Erro ao iniciar salvamento:', error)
+      // Erro ao iniciar salvamento
     }
   }
 
@@ -203,22 +203,18 @@ function CalculationResultContent({
     }
 
     try {
-      console.log('[EmailSubmit] Iniciando processo de verificação')
       const result = await signInWithEmail(email)
       
       if (result && result.success) {
-        console.log('[EmailSubmit] Email enviado com sucesso')
         if (result.mode) {
           setAuthMode(result.mode)
         }
         setStep('verify-code')
         toast.success('Código de verificação enviado para seu email!')
       } else {
-        console.error('[EmailSubmit] Erro ao enviar email:', result && result.error)
         toast.error((result && result.error) || 'Erro ao enviar código')
       }
     } catch (error) {
-      console.error('[EmailSubmit] Erro na requisição:', error)
       toast.error('Erro ao enviar código. Tente novamente.')
     }
   }
@@ -230,19 +226,15 @@ function CalculationResultContent({
     }
 
     try {
-      console.log('[CodeSubmit] Verificando código')
       const result = await verifyCode(verificationCode.trim(), authMode)
       
       if (result && result.success) {
-        console.log('[CodeSubmit] Código verificado com sucesso')
         // Sucesso - salvar e ir para Meus Cálculos
         await saveCalculation(email, actionType)
       } else {
-        console.error('[CodeSubmit] Erro na verificação:', result && result.error)
         toast.error((result && result.error) || 'Código inválido')
       }
     } catch (error) {
-      console.error('[CodeSubmit] Erro na verificação:', error)
       toast.error('Erro ao verificar código. Tente novamente.')
     }
   }
@@ -282,17 +274,14 @@ function CalculationResultContent({
       const result = await signInWithEmail(email)
       
       if (result && result.success) {
-        console.log('[ResendCode] Código reenviado com sucesso')
         if (result.mode) {
           setAuthMode(result.mode)
         }
         toast.success('Novo código enviado para seu email!')
       } else {
-        console.error('[ResendCode] Erro ao reenviar:', result && result.error)
         toast.error((result && result.error) || 'Erro ao reenviar código')
       }
     } catch (error) {
-      console.error('[ResendCode] Erro na requisição:', error)
       toast.error('Erro ao reenviar código. Tente novamente.')
     } finally {
       setIsResending(false)
@@ -569,7 +558,6 @@ function CalculationResultContent({
             variant="ghost"
             size="sm"
             onClick={() => {
-              console.log('[CalculationResult] Home button clicked')
               showHome()
             }}
             className="absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full hover:bg-gray-100 transition-colors"

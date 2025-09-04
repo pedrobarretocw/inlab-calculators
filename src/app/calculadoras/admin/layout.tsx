@@ -7,8 +7,6 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  console.log('[AdminLayout] Usando instância ADMIN:', clerkAdminConfig.publishableKey?.substring(0, 20) + '...')
-  
   return (
     <ClerkProvider
       publishableKey={clerkAdminConfig.publishableKey}

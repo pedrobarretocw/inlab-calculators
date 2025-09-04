@@ -61,11 +61,10 @@ function EmbedABContent({ articleSlug }: EmbedABProps) {
   
   const handleCalculate = (result: unknown) => {
     // Could trigger save flow here
-    console.log('Calculation result:', result)
   }
   
   const handleStart = () => {
-    console.log('User started calculation')
+    // User started calculation
   }
   
   if (loading) {

@@ -46,13 +46,7 @@ export function useCalculationResult(currentCalculatorType: string) {
     const typeToFormat = result.isFromSaved ? result.savedType : currentCalculatorType
     const finalType = typeToFormat || currentCalculatorType
     
-    console.log('[useCalculationResult] Formatando:', { 
-      currentCalculatorType, 
-      isFromSaved: result.isFromSaved, 
-      savedType: result.savedType,
-      finalType,
-      data: result.data 
-    })
+    // Formatando resultado do cálculo
     
     return ResultFormatter.formatByType(finalType, result.data)
   }

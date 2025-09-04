@@ -106,13 +106,10 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
   }
 
   const onError = async () => {
-    console.log('[DEBUG] onError called, errors:', form.formState.errors)
-    
     // Forçar validação antes de verificar erros
     await form.trigger()
     
     const errors = form.formState.errors
-    console.log('[DEBUG] Errors after trigger:', errors)
     
     if (Object.keys(errors).length > 0) {
       // Criar mensagem de erro
@@ -164,9 +161,6 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                 setShowSavedCalculations(false)
               }}
               onSelectCalculation={(calc) => {
-                console.log('[DEBUG] Cálculo selecionado:', calc)
-                console.log('[DEBUG] Inputs:', calc.inputs)
-                console.log('[DEBUG] Outputs:', calc.outputs)
                 
                 // Preencher os dados do formulário com os dados salvos
                 const inputs = calc.inputs || {}
@@ -179,7 +173,6 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                 
                 // Converter strings para números e tratar NaN
                 const parseValue = (value: any, fieldName?: string) => {
-                  console.log(`[DEBUG] Parsing ${fieldName}:`, value, typeof value)
                   
                   if (value === null || value === undefined) return 0
                   if (typeof value === 'number') return isNaN(value) ? 0 : value
@@ -212,7 +205,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                         parsed = -parsed // Aplica o sinal negativo
                       }
                       
-                      console.log(`[DEBUG] Moeda parseada ${fieldName}: "${value}" -> "${cleaned}" -> ${parsed}`)
+                      // Valor parseado com sucesso
                       return isNaN(parsed) ? 0 : parsed
                     }
                     // Caso contrário, apenas converter
@@ -223,7 +216,6 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                 }
                 
                 // Processar qualquer tipo de cálculo - mapeamento dinâmico baseado no tipo
-                console.log(`[DEBUG] Processando cálculo tipo ${calc.calculator_slug}...`)
                 
                 // Mapeamento dinâmico baseado no tipo de cálculo
                 let resultData: any
@@ -283,7 +275,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                   }
                 }
                 
-                console.log('[DEBUG] Resultado parseado:', resultData)
+                // Resultado parseado com sucesso
                 calculationResult.setSavedCalculation(resultData, calc.calculator_slug)
                 setShowSavedCalculations(false)
               }}
@@ -327,7 +319,6 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
             <div className="flex justify-center mt-1">
               <button
                 onClick={() => {
-                  console.log('[Ferias] Ver cálculos salvos - indo direto')
                   setShowSavedCalculations(true)
                 }}
                 className="px-2 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-700"
@@ -367,10 +358,10 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                 </div>
 
                 {/* Campos em Grid - Espaçamento compacto */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700">📅 Meses Trabalhados</span>
+                      <span className="text-xs sm:text-sm font-medium text-gray-700">Meses Trabalhados</span>
                       <Tooltip>
                         <TooltipTrigger>
                           <InfoIcon className="h-3 w-3 text-gray-400 hover:text-gray-600 transition-colors" />
@@ -398,7 +389,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
 
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700">Dias de Férias</span>
+                      <span className="text-xs sm:text-sm font-medium text-gray-700">Dias de Férias</span>
                       <Tooltip>
                         <TooltipTrigger>
                           <InfoIcon className="h-3 w-3 text-gray-400 hover:text-gray-600 transition-colors" />
@@ -442,10 +433,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
                     <button
                       type="button"
                       onClick={() => {
-                        console.log('[Ferias] Navegando para outras calculadoras')
-                        console.log('[Ferias] Estado atual - showCalculatorHome:', showCalculatorHome)
                         showHome()
-                        console.log('[Ferias] Chamou showHome()')
                       }}
                       className="text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
                     >

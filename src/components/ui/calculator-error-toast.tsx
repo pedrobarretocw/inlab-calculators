@@ -117,7 +117,6 @@ export function CalculatorErrorToastContainer({ className }: CalculatorErrorToas
 
   const addToast = React.useCallback((toast: Omit<CalculatorErrorToastData, 'id'>) => {
     const id = Math.random().toString(36).substring(2, 9)
-    console.log('[CalculatorErrorToast] Adding toast:', toast)
     setToasts(prev => [...prev, { ...toast, id }])
   }, [])
 
@@ -129,7 +128,6 @@ export function CalculatorErrorToastContainer({ className }: CalculatorErrorToas
   React.useEffect(() => {
     // @ts-ignore
     window.__addCalculatorErrorToast = addToast
-    console.log('[CalculatorErrorToast] Global function registered')
   }, [addToast])
 
   if (toasts.length === 0) return null

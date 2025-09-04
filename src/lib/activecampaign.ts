@@ -131,7 +131,6 @@ export class ActiveCampaignService {
       }
 
       const data: CreateContactResponse = await response.json()
-      console.log('[ActiveCampaign] Contato criado com sucesso:', data.contact.id)
       return data.contact
     } catch (error) {
       console.error('[ActiveCampaign] Erro ao criar contato:', error)
@@ -168,7 +167,6 @@ export class ActiveCampaignService {
       }
 
       const data: CreateContactResponse = await response.json()
-      console.log('[ActiveCampaign] Contato atualizado com sucesso:', data.contact.id)
       return data.contact
     } catch (error) {
       console.error('[ActiveCampaign] Erro ao atualizar contato:', error)
@@ -204,7 +202,6 @@ export class ActiveCampaignService {
       }
 
       const data: AddToListResponse = await response.json()
-      console.log(`[ActiveCampaign] Contato ${contactId} adicionado à lista ${listId} com sucesso`)
       return true
     } catch (error) {
       console.error('[ActiveCampaign] Erro ao adicionar contato à lista:', error)
@@ -221,13 +218,11 @@ export class ActiveCampaignService {
     listId: number = 15
   ): Promise<{ success: boolean; contactId?: string; message?: string }> {
     try {
-      console.log(`[ActiveCampaign] Processando contato: ${contactData.email}`)
       
       // 1. Verificar se o contato já existe
       let contact = await this.findContactByEmail(contactData.email)
       
       if (contact) {
-        console.log(`[ActiveCampaign] Contato encontrado: ${contact.id}`)
         
         // Atualizar dados se necessário
         if (contactData.firstName || contactData.lastName || contactData.phone) {
@@ -238,7 +233,6 @@ export class ActiveCampaignService {
         }
       } else {
         // 2. Criar novo contato
-        console.log('[ActiveCampaign] Criando novo contato...')
         contact = await this.createContact(contactData)
         
         if (!contact) {
@@ -247,7 +241,6 @@ export class ActiveCampaignService {
       }
 
       // 3. Adicionar à lista
-      console.log(`[ActiveCampaign] Adicionando contato ${contact.id} à lista ${listId}...`)
       const addedToList = await this.addContactToList(contact.id, listId)
       
       if (!addedToList) {

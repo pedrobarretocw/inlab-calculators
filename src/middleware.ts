@@ -21,25 +21,20 @@ const isPublicAdminRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   // Em desenvolvimento sem Clerk, libera tudo
   if (!isClerkEnabled()) {
-    console.log('[DevMiddleware] Clerk disabled, allowing all requests')
     return NextResponse.next()
   }
 
   // Se for rota pública do admin, liberar
   if (isPublicAdminRoute(req)) {
-    console.log(`[Middleware] 🟢 Rota pública admin liberada: ${req.nextUrl.pathname}`)
     return NextResponse.next()
   }
 
   // Se for rota admin protegida, verificar acesso
   if (isAdminRoute(req)) {
-    console.log(`[Middleware] 🛡️  Verificando acesso admin para: ${req.nextUrl.pathname}`)
-    
     const { userId, sessionClaims } = await auth()
     
     // Se não está logado
     if (!userId) {
-      console.log('[Middleware] ❌ Admin route: No userId - redirecionando para login')
       
       // Se for API, retornar JSON ao invés de redirect
       if (req.nextUrl.pathname.startsWith('/api/')) {
@@ -48,7 +43,6 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
       
       // Se for página, redirecionar para login
       const loginUrl = new URL('/calculadoras/admin/login', req.url)
-      console.log(`[Middleware] Redirecionando para: ${loginUrl.toString()}`)
       return NextResponse.redirect(loginUrl)
     }
 
@@ -62,17 +56,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
       const userEmail = sessionClaims?.email as string
       const isCloudwalkEmail = userEmail && userEmail.endsWith('@cloudwalk.io')
       
-      console.log('[Middleware] Admin verification:')
-      console.log('  - User ID:', userId)
-      console.log('  - Email:', userEmail)
-      console.log('  - Is Cloudwalk email:', isCloudwalkEmail)
-      console.log('  - Is from admin instance:', isFromAdminInstance)
-      console.log('  - Admin instance ID:', adminInstanceId)
+      // Verificar acesso admin
       
       // REGRA DEFINITIVA: AMBAS as condições devem ser verdadeiras
       if (!isFromAdminInstance || !isCloudwalkEmail) {
-        console.log('[Middleware] 🚫 ACESSO NEGADO - Usuário não autorizado')
-        console.log(`[Middleware] Motivo: ${!isFromAdminInstance ? 'Instância incorreta' : 'Email não é @cloudwalk.io'}`)
+        // Acesso negado
         
         // Se for API, retornar JSON ao invés de redirect
         if (req.nextUrl.pathname.startsWith('/api/')) {
@@ -89,11 +77,9 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
         return NextResponse.redirect(new URL('/calculadoras/admin/access-denied', req.url))
       }
 
-      console.log('[Middleware] ✅ ACESSO AUTORIZADO - Admin @cloudwalk.io verificado')
       return NextResponse.next()
       
     } catch (error) {
-      console.error('[Middleware] Error checking admin status:', error)
       
       // Se for API, retornar JSON ao invés de redirect
       if (req.nextUrl.pathname.startsWith('/api/')) {

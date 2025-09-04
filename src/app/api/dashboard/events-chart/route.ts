@@ -9,7 +9,6 @@ export async function GET(req: NextRequest) {
     const isAdmin = await isRealAdminUser()
     
     if (!isAdmin) {
-      console.log('[Dashboard API] BLOCKED: Public user trying to access admin API')
       return NextResponse.json({ error: 'Unauthorized - Please login as admin' }, { status: 401 })
     }
     const supabase = await createServiceRoleClient()
