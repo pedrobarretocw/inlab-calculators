@@ -624,40 +624,8 @@ function CalculationResultContent({
           <div className="pt-2 space-y-1.5 flex-shrink-0">
             {/* Buttons layout responsivo */}
             {!isFromSavedCalculation && (
-              // Botões normais (cálculo novo)
-              user && isLoaded ? (
-                // 3 botões quando logado - grid responsivo
-                <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button 
-                      onClick={handleSaveClick}
-                      className="h-10 bg-[#BAFF1B] text-black font-semibold hover:bg-[#A8E616] transition-all flex items-center gap-2 shadow-sm text-sm"
-                    >
-                      <Save className="h-3 w-3" />
-                      Salvar
-                    </Button>
-                    
-                    <Button 
-                      onClick={handleResetClick}
-                      variant="outline"
-                      className="h-10 border-gray-200 bg-white/50 backdrop-blur-sm hover:bg-gray-50/80 hover:border-gray-300 transition-all flex items-center gap-2 text-sm"
-                    >
-                      <RotateCcw className="h-3 w-3" />
-                      Refazer
-                    </Button>
-                  </div>
-                  
-                  <Button 
-                    onClick={() => onShowSavedCalculations && onShowSavedCalculations()}
-                    variant="outline"
-                    className="w-full h-9 border-blue-200 bg-blue-50/50 backdrop-blur-sm hover:bg-blue-100/80 hover:border-blue-300 transition-all flex items-center gap-2 text-sm text-blue-700"
-                  >
-                    <History className="h-3 w-3" />
-                    Meus Cálculos
-                  </Button>
-                </div>
-              ) : (
-                // 2 botões quando não logado - layout original
+              // Layout unificado para logado e não logado
+              <div className="space-y-2">
                 <div className="grid grid-cols-2 gap-2">
                   <Button 
                     onClick={handleSaveClick}
@@ -676,7 +644,16 @@ function CalculationResultContent({
                     Refazer
                   </Button>
                 </div>
-              )
+                
+                <Button 
+                  onClick={() => onShowSavedCalculations && onShowSavedCalculations()}
+                  variant="outline"
+                  className="w-full h-9 border-blue-200 bg-blue-50/50 backdrop-blur-sm hover:bg-blue-100/80 hover:border-blue-300 transition-all flex items-center gap-2 text-sm text-blue-700"
+                >
+                  <History className="h-3 w-3" />
+                  Meus Cálculos
+                </Button>
+              </div>
             )}
           </div>
         </CardContent>
