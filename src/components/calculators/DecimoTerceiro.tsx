@@ -207,12 +207,12 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
           
           {/* Back Button removido */}
           
-          <CardHeader className="pb-1 px-6 pt-1">
+          <CardHeader className={`px-6 ${isSaveDisabled ? 'pb-4 pt-4' : 'pb-1 pt-1'}`}>
             <CardTitle className="text-lg font-medium text-gray-900 flex items-center justify-center gap-2">
               <span>💰</span>
               Calculadora de 13º Salário
             </CardTitle>
-            <CardDescription className="text-center text-sm text-gray-600 mt-1">
+            <CardDescription className={`text-center text-sm text-gray-600 ${isSaveDisabled ? 'mt-3' : 'mt-1'}`}>
               Calcule seu 13º salário de forma rápida e fácil
             </CardDescription>
             
@@ -232,7 +232,7 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
             )}
           </CardHeader>
         
-          <CardContent className="px-6 pb-4 pt-1">
+          <CardContent className={`px-6 ${isSaveDisabled ? 'pb-5 pt-1' : 'pb-4 pt-1'}`}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-5">
                 {/* Campo de Salário - Minimalista */}

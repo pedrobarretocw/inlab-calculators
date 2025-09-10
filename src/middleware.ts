@@ -19,6 +19,8 @@ const isPublicAdminRoute = createRouteMatcher([
 
 // MIDDLEWARE ÚNICO E SIMPLES
 export default clerkMiddleware(async (auth, req: NextRequest) => {
+  const { pathname } = req.nextUrl
+
   // Em desenvolvimento sem Clerk, libera tudo
   if (!isClerkEnabled()) {
     return NextResponse.next()
@@ -90,8 +92,24 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     }
   }
 
-  // Para todas as outras rotas, libera
-  return NextResponse.next()
+  // Add iframe headers for embed routes (fix third-party cookie issues)
+  const response = NextResponse.next()
+  
+  if (pathname.startsWith("/embed") || pathname.startsWith("/calculadoras/embed")) {
+    // Remove X-Frame-Options completely to allow embedding anywhere
+    response.headers.delete('X-Frame-Options')
+    response.headers.set(
+      'Content-Security-Policy',
+      "frame-ancestors *;"
+    )
+    // Configure cookies for iframe compatibility
+    response.headers.set(
+      'Set-Cookie',
+      'SameSite=None; Secure'
+    )
+  }
+
+  return response
 })
 
 export const config = {

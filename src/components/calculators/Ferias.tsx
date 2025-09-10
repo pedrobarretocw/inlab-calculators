@@ -211,12 +211,12 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
           {/* Back Button removido */}
 
           
-          <CardHeader className="pb-2 px-6 pt-2">
+          <CardHeader className={`px-6 ${isSaveDisabled ? 'pb-4 pt-4' : 'pb-2 pt-2'}`}>
             <CardTitle className="text-lg font-medium text-gray-900 flex items-center justify-center gap-2">
               <span>🏖️</span>
               Calculadora de Férias
             </CardTitle>
-            <CardDescription className="text-center text-sm text-gray-600 mt-0.5">
+            <CardDescription className={`text-center text-sm text-gray-600 ${isSaveDisabled ? 'mt-3' : 'mt-0.5'}`}>
               Calcule suas férias de forma rápida e fácil
             </CardDescription>
             
@@ -236,7 +236,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
             )}
           </CardHeader>
           
-          <CardContent className="px-6 pb-3 pt-1">
+          <CardContent className={`px-6 ${isSaveDisabled ? 'pb-4 pt-1' : 'pb-3 pt-1'}`}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
                 {/* Campo de Salário - Minimalista */}

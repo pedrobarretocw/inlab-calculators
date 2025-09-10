@@ -13,7 +13,12 @@ export function PublicClerkProvider({ children }: PublicClerkProviderProps) {
   }
   
   return (
-    <ClerkProvider publishableKey={clerkPublicConfig.publishableKey}>
+    <ClerkProvider 
+      publishableKey={clerkPublicConfig.publishableKey}
+      experimental={{
+        sameSite: 'None'
+      }}
+    >
       {children}
     </ClerkProvider>
   )

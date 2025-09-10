@@ -216,12 +216,12 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
           
           {/* Back Button removido */}
           
-          <CardHeader className="pb-2 px-4 pt-2" style={{ backgroundColor: 'transparent' }}>
+          <CardHeader className={`px-4 ${isSaveDisabled ? 'pb-3 pt-3' : 'pb-2 pt-2'}`} style={{ backgroundColor: 'transparent' }}>
             <CardTitle className="text-base font-medium text-gray-900 flex items-center justify-center gap-2">
               <span>👥</span>
               Calculadora de Custo do Funcionário
             </CardTitle>
-            <CardDescription className="text-center text-xs text-gray-600 mt-0.5">
+            <CardDescription className={`text-center text-xs text-gray-600 ${isSaveDisabled ? 'mt-2' : 'mt-0.5'}`}>
               Calcule o custo total de um funcionário para a empresa
             </CardDescription>
             
@@ -241,7 +241,7 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
             )}
           </CardHeader>
         
-          <CardContent className="px-4 pb-3 pt-1" style={{ backgroundColor: 'transparent' }}>
+          <CardContent className={`px-4 pb-3 ${isSaveDisabled ? 'pt-0' : 'pt-1'}`} style={{ backgroundColor: 'transparent' }}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-3">
                 {/* Campo de Salário Base */}
