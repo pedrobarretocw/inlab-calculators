@@ -85,8 +85,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   return response
 })
 
+// Restrict Clerk middleware only to admin routes to avoid
+// Clerk handshake/redirect parameters on public embeds and pages.
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/calculadoras/admin/:path*',
+    '/api/dashboard/:path*',
   ],
 }

@@ -1,7 +1,6 @@
 'use client'
 
 import { createContext, useContext, useState, ReactNode } from 'react'
-// import { usePublicAuth } from '@/hooks/usePublicAuth' // Removido para evitar dependência global
 
 type CalculatorType = 'ferias' | 'custo-funcionario' | '13o-salario'
 
@@ -54,7 +53,6 @@ export function CalculatorProvider({ children, initialCalculator }: CalculatorPr
   const [loadingSavedCalculations, setLoadingSavedCalculations] = useState(false)
   
   // User será passado via parâmetros quando necessário
-  // const { user, isLoaded } = usePublicAuth() // Removido
   
   // Função para buscar cálculos salvos do banco
   const fetchSavedCalculations = async (userEmail?: string) => {
