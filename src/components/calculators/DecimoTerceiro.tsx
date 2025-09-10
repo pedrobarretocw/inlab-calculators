@@ -39,6 +39,9 @@ interface DecimoTerceiroProps {
 export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', articleSlug }: DecimoTerceiroProps) {
   const [hasStarted, setHasStarted] = useState(false)
   const [showSavedCalculations, setShowSavedCalculations] = useState(false)
+  const [showLeadModal, setShowLeadModal] = useState(false)
+  const [leadEmail, setLeadEmail] = useState('')
+  const [pendingData, setPendingData] = useState<DecimoTerceiroInput | null>(null)
   const [fadeClass, setFadeClass] = useState('opacity-100')
 
   const { showHome } = useCalculator()
@@ -83,19 +86,54 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
   }
 
   const onSubmit = (data: DecimoTerceiroInput) => {
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('leadEmail') : null
+    if (!stored) {
+      setPendingData(data)
+      setLeadEmail('')
+      setShowLeadModal(true)
+      return
+    }
     const result = calcularDecimoTerceiro(data)
     calculationResult.setNewCalculation(result)
     onCalculate?.(result)
-    
     showCalculationSuccess('13º Salário')
-    
-    track({
-      event: 'calculate',
-      calculatorSlug: '13o-salario',
-      variant,
-      articleSlug,
-      metadata: { inputs: data, outputs: calculationResult },
-    })
+    track({ event: 'calculate', calculatorSlug: '13o-salario', variant, articleSlug, metadata: { inputs: data, outputs: calculationResult } })
+  }
+
+  const handleLeadSubmit = async () => {
+    if (!leadEmail.trim()) return
+    try {
+      await fetch('/api/add-to-activecampaign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: leadEmail.trim() })
+      })
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('leadEmail', leadEmail.trim())
+      }
+    } finally {
+      setShowLeadModal(false)
+      if (pendingData) {
+        const result = calcularDecimoTerceiro(pendingData)
+        calculationResult.setNewCalculation(result)
+        onCalculate?.(result)
+        showCalculationSuccess('13º Salário')
+        track({ event: 'calculate', calculatorSlug: '13o-salario', variant, articleSlug, metadata: { inputs: pendingData, outputs: calculationResult } })
+        setPendingData(null)
+      }
+    }
+  }
+
+  const handleLeadSkip = () => {
+    setShowLeadModal(false)
+    if (pendingData) {
+      const result = calcularDecimoTerceiro(pendingData)
+      calculationResult.setNewCalculation(result)
+      onCalculate?.(result)
+      showCalculationSuccess('13º Salário')
+      track({ event: 'calculate', calculatorSlug: '13o-salario', variant, articleSlug, metadata: { inputs: pendingData, outputs: calculationResult } })
+      setPendingData(null)
+    }
   }
 
   const onError = async () => {
@@ -304,6 +342,31 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
           savedCalculationType={calculationResult.result.savedType}
         />
       </div>
+
+      {showLeadModal && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/5 backdrop-blur-sm rounded-lg">
+          <div className="w-full max-w-sm mx-4 border border-gray-200/60 rounded-lg bg-white p-5">
+            <h3 className="text-lg font-medium text-gray-900 text-center">Receba materiais exclusivos</h3>
+            <p className="text-sm text-gray-600 text-center mt-2">Digite seu email para receber conteúdos de empreendedorismo.</p>
+            <div className="mt-4">
+              <input
+                type="email"
+                value={leadEmail}
+                onChange={(e) => setLeadEmail(e.target.value)}
+                placeholder="seu@email.com"
+                className="w-full h-10 border border-gray-200 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
+            <button
+              onClick={handleLeadSubmit}
+              className="mt-3 w-full h-10 bg-[#BAFF1B] text-black font-semibold rounded-md hover:bg-[#A8E616]"
+            >
+              Quero receber
+            </button>
+            <button onClick={handleLeadSkip} className="mt-2 w-full text-[11px] text-gray-400 opacity-70 hover:opacity-100">Não quero</button>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Login removido (código não utilizado) */}
     </TooltipProvider>

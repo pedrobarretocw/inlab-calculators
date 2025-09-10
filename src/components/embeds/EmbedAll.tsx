@@ -7,7 +7,6 @@ import { DecimoTerceiro } from '@/components/calculators/DecimoTerceiro'
 import { CalculatorHome } from '@/components/calculators/CalculatorHome'
 import { CalculatorSkeleton } from '@/components/ui/CalculatorSkeleton'
 import { useCalculator } from '@/contexts/CalculatorContext'
-import { PublicClerkProvider } from '@/components/auth/PublicClerkProvider'
 
 interface EmbedAllProps {
   articleSlug?: string
@@ -121,9 +120,5 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
 }
 
 export function EmbedAll({ articleSlug, initialCalculator }: EmbedAllProps) {
-  return (
-    <PublicClerkProvider>
-      <EmbedAllContent articleSlug={articleSlug} initialCalculator={initialCalculator} />
-    </PublicClerkProvider>
-  )
+  return <EmbedAllContent articleSlug={articleSlug} initialCalculator={initialCalculator} />
 }

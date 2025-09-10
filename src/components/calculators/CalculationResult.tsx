@@ -5,10 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { RotateCcw, Save, Mail, ArrowLeft, Sparkles, History, Home } from 'lucide-react'
+import { RotateCcw, Save, Mail, ArrowLeft, History, Home } from 'lucide-react'
 import { toast } from 'sonner'
-import { PublicClerkProvider } from '@/components/auth/PublicClerkProvider'
-import { usePublicAuth } from '@/hooks/usePublicAuth'
 import { useCalculator } from '@/contexts/CalculatorContext'
 // import { addEmailToActiveCampaign } from '@/lib/activecampaign' // Movido para API route
 
@@ -69,15 +67,10 @@ function CalculationResultContent({
   const [showEmailCapture, setShowEmailCapture] = useState(false)
   const [actionType, setActionType] = useState<'save' | 'reset'>('save')
   const [email, setEmail] = useState('')
-  const [step, setStep] = useState<'email' | 'verify-code'>('email')
-  const [verificationCode, setVerificationCode] = useState('')
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup')
+  
   const [calculationName, setCalculationName] = useState('')
   const [showNameModal, setShowNameModal] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(false)
-  const [isResending, setIsResending] = useState(false)
   
-  const { user, isLoaded, isLoading, signInWithEmail, verifyCode } = usePublicAuth()
 
   const saveCalculation = async (currentEmail: string) => {
     // Criar objeto do cálculo salvo
@@ -169,8 +162,8 @@ function CalculationResultContent({
   const handleSaveClick = async () => {
     setActionType('save')
     
-    // Se já estiver logado, mostrar modal de nome primeiro
-    if (user && isLoaded) {
+    const leadEmail = typeof window !== 'undefined' ? localStorage.getItem('leadEmail') : null
+    if (leadEmail) {
       setShowNameModal(true)
       return
     }
@@ -179,19 +172,17 @@ function CalculationResultContent({
   }
 
   const handleSaveWithName = async () => {
-    if (user && isLoaded) {
-      const userEmail = user.emailAddresses?.[0]?.emailAddress || 'user@example.com'
-      await saveCalculation(userEmail)
-      setShowNameModal(false)
-      setCalculationName('') // Limpar o campo
-    }
+    const userEmail = (typeof window !== 'undefined' ? localStorage.getItem('leadEmail') : null) || 'lead@local'
+    await saveCalculation(userEmail)
+    setShowNameModal(false)
+    setCalculationName('')
   }
 
   const handleResetClick = async () => {
     setActionType('reset')
     
-    // Se já estiver logado, resetar direto sem salvar
-    if (user && isLoaded) {
+    const leadEmail = typeof window !== 'undefined' ? localStorage.getItem('leadEmail') : null
+    if (leadEmail) {
       onReset()
       return
     }
@@ -206,19 +197,18 @@ function CalculationResultContent({
     }
 
     try {
-      const result = await signInWithEmail(email)
-      
-      if (result && result.success) {
-        if (result.mode) {
-          setAuthMode(result.mode)
-        }
-        setStep('verify-code')
-        toast.success('Código de verificação enviado para seu email!')
-      } else {
-        toast.error((result && result.error) || 'Erro ao enviar código')
+      await fetch('/api/add-to-activecampaign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() })
+      })
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('leadEmail', email.trim())
       }
+      setShowEmailCapture(false)
+      toast.success('Email registrado com sucesso!')
     } catch {
-      toast.error('Erro ao enviar código. Tente novamente.')
+      toast.error('Erro ao enviar email. Tente novamente.')
     }
   }
 
@@ -226,52 +216,10 @@ function CalculationResultContent({
 
   const handleBackFromEmail = () => {
     setShowEmailCapture(false)
-    setStep('email')
     setEmail('')
-    setVerificationCode('')
-    setCalculationName('') // Limpar o nome
+    setCalculationName('')
   }
-
-  const handleVerifyCode = async () => {
-    if (!verificationCode.trim()) {
-      toast.error('Por favor, digite o código de verificação')
-      return
-    }
-
-    setIsVerifying(true)
-    try {
-      const result = await verifyCode(verificationCode.trim(), authMode)
-      
-      if (result && result.success) {
-        // Sucesso - salvar e ir para Meus Cálculos
-        await saveCalculation(email)
-      } else {
-        toast.error((result && result.error) || 'Código inválido')
-      }
-    } finally {
-      setIsVerifying(false)
-    }
-  }
-
-  const handleResendCode = async () => {
-    setIsResending(true)
-    try {
-      const result = await signInWithEmail(email)
-      
-      if (result && result.success) {
-        if (result.mode) {
-          setAuthMode(result.mode)
-        }
-        toast.success('Novo código enviado para seu email!')
-      } else {
-        toast.error((result && result.error) || 'Erro ao reenviar código')
-      }
-    } catch {
-      toast.error('Erro ao reenviar código. Tente novamente.')
-    } finally {
-      setIsResending(false)
-    }
-  }
+  
 
   const handleSkipSave = () => {
     setShowEmailCapture(false)
@@ -376,29 +324,19 @@ function CalculationResultContent({
 
             <div className="text-center space-y-5 max-w-sm mx-auto">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
-                {step === 'email' ? <Mail className="h-8 w-8 text-white" /> : <Sparkles className="h-8 w-8 text-white" />}
+                <Mail className="h-8 w-8 text-white" />
               </div>
 
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-1">
-                  {step === 'email' 
-                    ? (actionType === 'save' ? 'Salvar Cálculo' : 'Salvar Histórico')
-                    : 'Digite o Código'
-                  }
+                  Receba materiais exclusivos
                 </h2>
                 <p className="text-gray-600 text-sm leading-relaxed px-2 pt-2">
-                  {step === 'email' 
-                    ? (actionType === 'save' 
-                      ? 'Digite seu email para salvar este cálculo e acessá-lo depois'
-                      : 'Salve seus dados antes de fazer um novo cálculo para não perder o histórico'
-                    )
-                    : `Digite o código de 6 dígitos enviado para ${email}`
-                  }
+                  Digite seu email para receber conteúdos de empreendedorismo.
                 </p>
               </div>
 
-              {step === 'email' ? (
-                <div className="space-y-3">
+              <div className="space-y-3">
                   <div className="text-left">
                     <Label htmlFor="email" className="text-xs font-medium text-gray-700">
                       Email
@@ -413,97 +351,24 @@ function CalculationResultContent({
                     />
                   </div>
                   
-                  <div className="text-left">
-                    <Label htmlFor="calculation-name" className="text-xs font-medium text-gray-700">
-                      Nome do Cálculo (opcional)
-                    </Label>
-                    <Input
-                      id="calculation-name"
-                      type="text"
-                      value={calculationName}
-                      onChange={(e) => setCalculationName(e.target.value)}
-                      placeholder="Férias de Out 25"
-                      className="mt-1 h-10 text-center bg-white border-gray-200 focus:border-blue-300 focus:ring-blue-200 transition-all text-sm"
-                      maxLength={40}
-                    />
-                  </div>
-
                   <div className="space-y-2">
                     <Button
                       onClick={handleEmailSubmit}
-                      disabled={isLoading}
+                      
                       className="w-full h-10 bg-[#BAFF1B] text-black font-semibold hover:bg-[#A8E616] transition-colors flex items-center gap-2 text-sm"
                     >
-                      {isLoading ? (
-                        <div className="w-3 h-3 border-2 border-gray-700 border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Mail className="h-3 w-3" />
-                      )}
-                      {isLoading ? 'Enviando...' : 'Enviar Código'}
+                      <Mail className="h-3 w-3" />
+                      Quero receber
                     </Button>
 
                     <button
                       onClick={handleSkipSave}
-                      className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                      className="text-[11px] text-gray-400 hover:text-gray-600 transition-colors opacity-70"
                     >
-                      {actionType === 'save' ? 'Não quero salvar' : 'Pular e continuar'}
+                      Não quero
                     </button>
                   </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="text-left">
-                    <Label htmlFor="code" className="text-xs font-medium text-gray-700">
-                      Código de verificação
-                    </Label>
-                    <Input
-                      id="code"
-                      type="text"
-                      value={verificationCode}
-                      onChange={(e) => setVerificationCode(e.target.value)}
-                      placeholder="123456"
-                      maxLength={6}
-                      className="mt-1 h-10 text-center bg-white border-gray-200 focus:border-blue-300 focus:ring-blue-200 transition-all text-lg font-mono tracking-widest"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Button
-                      onClick={handleVerifyCode}
-                      disabled={isVerifying}
-                      className="w-full h-10 bg-[#BAFF1B] text-black font-semibold hover:bg-[#A8E616] transition-colors flex items-center gap-2 text-sm"
-                    >
-                      {isVerifying ? (
-                        <div className="w-3 h-3 border-2 border-gray-700 border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Save className="h-3 w-3" />
-                      )}
-                      {isVerifying ? 'Verificando...' : 'Verificar e Salvar'}
-                    </Button>
-
-                    <Button
-                      onClick={handleResendCode}
-                      disabled={isResending}
-                      variant="outline"
-                      className="w-full h-8 border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center gap-2 text-xs"
-                    >
-                      {isResending ? (
-                        <div className="w-3 h-3 border-2 border-gray-700 border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Mail className="h-3 w-3" />
-                      )}
-                      {isResending ? 'Reenviando...' : 'Reenviar Código'}
-                    </Button>
-
-                    <button
-                      onClick={() => setStep('email')}
-                      className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      Tentar outro email
-                    </button>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -665,9 +530,5 @@ function CalculationResultContent({
 
 // Componente principal que provê o contexto do Clerk
 export function CalculationResult(props: CalculationResultProps) {
-  return (
-    <PublicClerkProvider>
-      <CalculationResultContent {...props} />
-    </PublicClerkProvider>
-  )
+  return <CalculationResultContent {...props} />
 }

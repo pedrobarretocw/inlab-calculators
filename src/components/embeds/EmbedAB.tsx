@@ -5,7 +5,6 @@ import { Ferias } from '@/components/calculators/Ferias'
 import { CustoFuncionario } from '@/components/calculators/CustoFuncionario'
 import { DecimoTerceiro } from '@/components/calculators/DecimoTerceiro'
 import { getVariant, setVariant } from '@/lib/tracking'
-import { PublicClerkProvider } from '@/components/auth/PublicClerkProvider'
 
 interface EmbedABProps {
   articleSlug?: string
@@ -114,9 +113,5 @@ function EmbedABContent({ articleSlug }: EmbedABProps) {
 }
 
 export function EmbedAB({ articleSlug }: EmbedABProps) {
-  return (
-    <PublicClerkProvider>
-      <EmbedABContent articleSlug={articleSlug} />
-    </PublicClerkProvider>
-  )
+  return <EmbedABContent articleSlug={articleSlug} />
 }

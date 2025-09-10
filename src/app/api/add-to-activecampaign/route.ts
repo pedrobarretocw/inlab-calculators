@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { addEmailToActiveCampaign } from '@/lib/activecampaign'
+import { createServiceRoleClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,14 +14,26 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Processando email no ActiveCampaign
-    
-    const result = await addEmailToActiveCampaign(email, firstName, lastName, phone)
-    
-    if (result.success) {
-      return NextResponse.json(result)
+    // ActiveCampaign + salvar lead no Supabase em paralelo
+    const [acResult] = await Promise.all([
+      addEmailToActiveCampaign(email, firstName, lastName, phone),
+      (async () => {
+        try {
+          const supabase = await createServiceRoleClient()
+          await supabase.from('leads').upsert(
+            { email, status: 'unverified' },
+            { onConflict: 'email', ignoreDuplicates: true }
+          )
+        } catch {
+          // silencioso: não falha a rota se insert do lead falhar
+        }
+      })()
+    ])
+
+    if (acResult.success) {
+      return NextResponse.json(acResult)
     } else {
-      return NextResponse.json(result, { status: 400 })
+      return NextResponse.json(acResult, { status: 400 })
     }
   } catch (error) {
     return NextResponse.json(
@@ -32,4 +45,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

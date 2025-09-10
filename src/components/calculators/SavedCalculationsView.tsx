@@ -3,10 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Calculator, Home, Trash2, LogOut, User } from 'lucide-react'
-import { useClerk } from '@clerk/nextjs'
-import { PublicClerkProvider } from '@/components/auth/PublicClerkProvider'
-import { SimpleLoginForm } from '@/components/auth/SimpleLoginForm'
-import { usePublicAuth } from '@/hooks/usePublicAuth'
+ 
 import { useCalculator } from '@/contexts/CalculatorContext'
 
 interface SavedCalculation {
@@ -24,30 +21,17 @@ interface SavedCalculationsViewProps {
 }
 
 function SavedCalculationsContent({ onBack, onSelectCalculation }: SavedCalculationsViewProps) {
-  const { user, isLoaded } = usePublicAuth()
-  const { setActive } = useClerk()
   const { showHome, savedCalculations, loadingSavedCalculations, refreshSavedCalculations, deleteCalculation } = useCalculator()
   const [showLogoutMenu, setShowLogoutMenu] = useState(false)
 
-  const handleLogout = async () => {
-    try {
-      await setActive({ session: null })
-      setShowLogoutMenu(false)
-      refreshSavedCalculations()
-    } catch (error) {
-      console.error('Erro ao fazer logout:', error)
-    }
-  }
+  const handleLogout = async () => {}
  
   useEffect(() => {
-    if (!isLoaded) return
-    if (user) {
-      const userEmail = user.emailAddresses?.[0]?.emailAddress
-      if (userEmail) {
-        refreshSavedCalculations(userEmail)
-      }
+    const leadEmail = typeof window !== 'undefined' ? localStorage.getItem('leadEmail') : null
+    if (leadEmail) {
+      refreshSavedCalculations(leadEmail)
     }
-  }, [user, isLoaded, refreshSavedCalculations])
+  }, [refreshSavedCalculations])
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -140,8 +124,7 @@ function SavedCalculationsContent({ onBack, onSelectCalculation }: SavedCalculat
     }
   }
 
-  const handleLoginSuccess = () => {
-  }
+  const handleLoginSuccess = () => {}
 
 
 
@@ -199,7 +182,7 @@ function SavedCalculationsContent({ onBack, onSelectCalculation }: SavedCalculat
             Meus Cálculos
           </h2>
         </div>
-        {user && (
+        {false && (
           <div className="absolute right-12 top-1/2 transform -translate-y-1/2 z-50">
             <div className="relative">
               <button
@@ -239,39 +222,17 @@ function SavedCalculationsContent({ onBack, onSelectCalculation }: SavedCalculat
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 pb-4 pt-3">
         {savedCalculations.length === 0 ? (
           <div className="text-center py-8">
-            {!user ? (
-              <div className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
-                <p className="text-sm text-gray-600 mb-6">
-                  Faça login/cadastro para ver e salvar os seus cálculos
-                </p>
-
-                <div className="w-full max-w-xs mx-auto mb-6 animate-in fade-in-0 duration-300 delay-200">
-                  <SimpleLoginForm
-                    onSuccess={handleLoginSuccess}
-                  />
-                </div>
-
-                <button
-                  onClick={onBack}
-                  className="text-sm text-gray-600 hover:text-gray-700 font-medium transition-colors"
-                >
-                  Voltar para calculadora
-                </button>
-              </div>
-            ) : (
-              <div className="animate-in fade-in-0 slide-in-from-bottom-4 duration-600">
-                <p className="text-sm text-gray-600 mb-6 animate-in fade-in-0 duration-500 delay-300">
-                  Nenhum cálculo salvo
-                </p>
-
-                <button
-                  onClick={onBack}
-                  className="text-sm text-gray-600 hover:text-gray-700 font-medium transition-colors animate-in fade-in-0 duration-500 delay-400"
-                >
-                  Fazer primeiro cálculo
-                </button>
-              </div>
-            )}
+            <div className="animate-in fade-in-0 slide-in-from-bottom-4 duration-600">
+              <p className="text-sm text-gray-600 mb-6 animate-in fade-in-0 duration-500 delay-300">
+                Nenhum cálculo salvo
+              </p>
+              <button
+                onClick={onBack}
+                className="text-sm text-gray-600 hover:text-gray-700 font-medium transition-colors animate-in fade-in-0 duration-500 delay-400"
+              >
+                Fazer primeiro cálculo
+              </button>
+            </div>
           </div>
         ) : (
           <div className="space-y-2">
@@ -330,9 +291,5 @@ function SavedCalculationsContent({ onBack, onSelectCalculation }: SavedCalculat
 }
 
 export function SavedCalculationsView(props: SavedCalculationsViewProps) {
-  return (
-    <PublicClerkProvider>
-      <SavedCalculationsContent {...props} />
-    </PublicClerkProvider>
-  )
+  return <SavedCalculationsContent {...props} />
 }
