@@ -17,10 +17,21 @@ const isPublicAdminRoute = createRouteMatcher([
   '/calculadoras/admin/access-denied'
 ])
 
+// Rotas de embed que devem ser totalmente públicas (sem Clerk)
+const isEmbedRoute = createRouteMatcher([
+  '/calculadoras/embed/(.*)',
+  '/embed/(.*)'
+])
+
 // MIDDLEWARE ÚNICO E SIMPLES
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   // Em desenvolvimento sem Clerk, libera tudo
   if (!isClerkEnabled()) {
+    return NextResponse.next()
+  }
+
+  // Se for rota de embed, liberar completamente (sem Clerk)
+  if (isEmbedRoute(req)) {
     return NextResponse.next()
   }
 
