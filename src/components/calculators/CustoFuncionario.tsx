@@ -53,9 +53,6 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationMessage, setValidationMessage] = useState('')
   
-  // Verificar se salvamento está desabilitado
-  const isSaveDisabled = process.env.NEXT_PUBLIC_DISABLE_SAVE_CALCULATIONS === 'true'
-  
   // Helper para converter valores de forma segura
   const convertToNumber = (value: unknown): number => {
     if (typeof value === 'number') return value
@@ -216,32 +213,30 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
           
           {/* Back Button removido */}
           
-          <CardHeader className={`px-4 ${isSaveDisabled ? 'pb-3 pt-3' : 'pb-2 pt-2'}`} style={{ backgroundColor: 'transparent' }}>
+          <CardHeader className={`px-4 pb-2 pt-2`} style={{ backgroundColor: 'transparent' }}>
             <CardTitle className="text-base font-medium text-gray-900 flex items-center justify-center gap-2">
               <span>👥</span>
               Calculadora de Custo do Funcionário
             </CardTitle>
-            <CardDescription className={`text-center text-xs text-gray-600 ${isSaveDisabled ? 'mt-2' : 'mt-0.5'}`}>
+            <CardDescription className={`text-center text-xs text-gray-600 mt-0.5`}>
               Calcule o custo total de um funcionário para a empresa
             </CardDescription>
             
-            {/* Botão Ver Cálculos Salvos abaixo da descrição - apenas se salvamento habilitado */}
-            {!isSaveDisabled && (
-              <div className="flex justify-center mt-1">
-                <button
-                  onClick={() => {
-                    setShowSavedCalculations(true)
-                  }}
-                  className="px-2 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-700"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  <span className="font-medium">Ver Cálculos Salvos</span>
-                </button>
-              </div>
-            )}
+            {/* Botão Ver Cálculos Salvos abaixo da descrição */}
+            <div className="flex justify-center mt-1">
+              <button
+                onClick={() => {
+                  setShowSavedCalculations(true)
+                }}
+                className="px-2 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-700"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span className="font-medium">Ver Cálculos Salvos</span>
+              </button>
+            </div>
           </CardHeader>
         
-          <CardContent className={`px-4 pb-3 ${isSaveDisabled ? 'pt-0' : 'pt-1'}`} style={{ backgroundColor: 'transparent' }}>
+          <CardContent className={`px-4 pb-3 pt-1`} style={{ backgroundColor: 'transparent' }}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-3">
                 {/* Campo de Salário Base */}

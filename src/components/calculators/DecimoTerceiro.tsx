@@ -54,9 +54,6 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationMessage, setValidationMessage] = useState('')
   
-  // Verificar se salvamento está desabilitado
-  const isSaveDisabled = process.env.NEXT_PUBLIC_DISABLE_SAVE_CALCULATIONS === 'true'
-  
   // Helper para converter valores de forma segura
   const convertToNumber = (value: unknown): number => {
     if (typeof value === 'number') return value
@@ -207,32 +204,30 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
           
           {/* Back Button removido */}
           
-          <CardHeader className={`px-6 ${isSaveDisabled ? 'pb-4 pt-4' : 'pb-1 pt-1'}`}>
+          <CardHeader className={`px-6 pb-1 pt-1`}>
             <CardTitle className="text-lg font-medium text-gray-900 flex items-center justify-center gap-2">
               <span>💰</span>
               Calculadora de 13º Salário
             </CardTitle>
-            <CardDescription className={`text-center text-sm text-gray-600 ${isSaveDisabled ? 'mt-3' : 'mt-1'}`}>
+            <CardDescription className={`text-center text-sm text-gray-600 mt-1`}>
               Calcule seu 13º salário de forma rápida e fácil
             </CardDescription>
             
-            {/* Botão Ver Cálculos Salvos abaixo da descrição - apenas se salvamento habilitado */}
-            {!isSaveDisabled && (
-              <div className="flex justify-center mt-1">
-                <button
-                  onClick={() => {
-                    setShowSavedCalculations(true)
-                  }}
-                  className="px-2 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-700"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  <span className="font-medium">Ver Cálculos Salvos</span>
-                </button>
-              </div>
-            )}
+            {/* Botão Ver Cálculos Salvos abaixo da descrição */}
+            <div className="flex justify-center mt-1">
+              <button
+                onClick={() => {
+                  setShowSavedCalculations(true)
+                }}
+                className="px-2 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-700"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span className="font-medium">Ver Cálculos Salvos</span>
+              </button>
+            </div>
           </CardHeader>
         
-          <CardContent className={`px-6 ${isSaveDisabled ? 'pb-5 pt-1' : 'pb-4 pt-1'}`}>
+          <CardContent className={`px-6 pb-4 pt-1`}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-5">
                 {/* Campo de Salário - Minimalista */}

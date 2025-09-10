@@ -71,8 +71,6 @@ function CalculationResultContent({
   
   const { showHome, refreshSavedCalculations, addSavedCalculation } = useCalculator()
   
-  // Verificar se salvamento está desabilitado
-  const isSaveDisabled = process.env.NEXT_PUBLIC_DISABLE_SAVE_CALCULATIONS === 'true'
   const [showEmailCapture, setShowEmailCapture] = useState(false)
   const [actionType, setActionType] = useState<'save' | 'reset'>('save')
   const [email, setEmail] = useState('')
@@ -196,12 +194,6 @@ function CalculationResultContent({
 
   const handleResetClick = async () => {
     setActionType('reset')
-    
-    // Se salvamento está desabilitado, resetar direto
-    if (isSaveDisabled) {
-      onReset()
-      return
-    }
     
     // Se já estiver logado, resetar direto sem salvar
     if (user && isLoaded) {
@@ -569,12 +561,7 @@ function CalculationResultContent({
             variant="ghost"
             size="sm"
             onClick={() => {
-              // Se salvamento está desabilitado, volta direto para calculadora
-              if (isSaveDisabled) {
-                onReset()
-              } else {
-                onShowSavedCalculations && onShowSavedCalculations()
-              }
+              onShowSavedCalculations && onShowSavedCalculations()
             }}
             className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full hover:bg-gray-100 transition-colors"
           >
@@ -672,9 +659,16 @@ function CalculationResultContent({
           }`}>
             {/* Buttons layout responsivo */}
             {!isFromSavedCalculation && (
-              isSaveDisabled ? (
-                // Apenas botão Refazer quando salvamento está desabilitado
-                <div className="flex justify-center">
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button 
+                    onClick={handleSaveClick}
+                    className="h-10 bg-[#BAFF1B] text-black font-semibold hover:bg-[#A8E616] transition-all flex items-center gap-2 shadow-sm text-sm"
+                  >
+                    <Save className="h-3 w-3" />
+                    Salvar
+                  </Button>
+                  
                   <Button 
                     onClick={handleResetClick}
                     variant="outline"
@@ -684,38 +678,16 @@ function CalculationResultContent({
                     Refazer
                   </Button>
                 </div>
-              ) : (
-                // Layout unificado para logado e não logado com salvamento
-                <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button 
-                      onClick={handleSaveClick}
-                      className="h-10 bg-[#BAFF1B] text-black font-semibold hover:bg-[#A8E616] transition-all flex items-center gap-2 shadow-sm text-sm"
-                    >
-                      <Save className="h-3 w-3" />
-                      Salvar
-                    </Button>
-                    
-                    <Button 
-                      onClick={handleResetClick}
-                      variant="outline"
-                      className="h-10 border-gray-200 bg-white/50 backdrop-blur-sm hover:bg-gray-50/80 hover:border-gray-300 transition-all flex items-center gap-2 text-sm"
-                    >
-                      <RotateCcw className="h-3 w-3" />
-                      Refazer
-                    </Button>
-                  </div>
-                  
-                  <Button 
-                    onClick={() => onShowSavedCalculations && onShowSavedCalculations()}
-                    variant="outline"
-                    className="w-full h-9 border-blue-200 bg-blue-50/50 backdrop-blur-sm hover:bg-blue-100/80 hover:border-blue-300 transition-all flex items-center gap-2 text-sm text-blue-700"
-                  >
-                    <History className="h-3 w-3" />
-                    Meus Cálculos
-                  </Button>
-                </div>
-              )
+                
+                <Button 
+                  onClick={() => onShowSavedCalculations && onShowSavedCalculations()}
+                  variant="outline"
+                  className="w-full h-9 border-blue-200 bg-blue-50/50 backdrop-blur-sm hover:bg-blue-100/80 hover:border-blue-300 transition-all flex items-center gap-2 text-sm text-blue-700"
+                >
+                  <History className="h-3 w-3" />
+                  Meus Cálculos
+                </Button>
+              </div>
             )}
           </div>
         </CardContent>
