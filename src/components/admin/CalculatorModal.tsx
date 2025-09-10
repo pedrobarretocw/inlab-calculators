@@ -30,15 +30,21 @@ export function CalculatorModal({ calculatorSlug, calculatorName, embedType }: C
     
     switch (embedType) {
       case 'single':
-        embedCode = `<iframe src="${baseUrl}/calculadoras/embed/all?calculator=${calculatorSlug}" width="500" height="500" frameborder="0" style="border: none; border-radius: 8px;"></iframe>`
+        embedCode = `<section id="inlab-calculadora-${calculatorSlug}">
+  <iframe src="${baseUrl}/calculadoras/embed/all?calculator=${calculatorSlug}" width="500" height="500" frameborder="0" style="border: none; border-radius: 8px;"></iframe>
+</section>`
         successMessage = `${calculatorName} embed code copied!`
         break
       case 'ab':
-        embedCode = `<iframe src="${baseUrl}/calculadoras/embed/ab" width="500" height="500" frameborder="0" style="border: none; border-radius: 8px;"></iframe>`
+        embedCode = `<section id="inlab-calculadora-ab-test">
+  <iframe src="${baseUrl}/calculadoras/embed/ab" width="500" height="500" frameborder="0" style="border: none; border-radius: 8px;"></iframe>
+</section>`
         successMessage = 'A/B Test embed code copied!'
         break
       case 'carousel':
-        embedCode = `<iframe src="${baseUrl}/calculadoras/embed/all" width="500" height="500" frameborder="0" style="border: none; border-radius: 8px;"></iframe>`
+        embedCode = `<section id="inlab-calculadora-carousel">
+  <iframe src="${baseUrl}/calculadoras/embed/all" width="500" height="500" frameborder="0" style="border: none; border-radius: 8px;"></iframe>
+</section>`
         successMessage = 'Carousel embed code copied!'
         break
     }
