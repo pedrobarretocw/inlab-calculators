@@ -42,7 +42,6 @@ export function CurrencyInput({
             fixedDecimalScale={value > 0}
             allowNegative={false}
             placeholder={placeholder}
-            allowEmptyFormatting={false}
             onFocus={(e) => {
               // Se o campo está vazio ou zero, limpa para facilitar digitação
               if (value === 0 || !value) {
