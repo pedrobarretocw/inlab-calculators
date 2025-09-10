@@ -56,8 +56,7 @@ export const metadata: Metadata = {
   },
 };
 
-// Flag para ativar/desativar Clerk em desenvolvimento
-const isClerkEnabled = () => process.env.ENABLE_CLERK === 'true'
+// ClerkProvider global removido; cada área usa sua instância
 
 // Sem ClerkProvider global - cada área usa sua própria instância
 function AuthProvider({ children }: { children: React.ReactNode }) {

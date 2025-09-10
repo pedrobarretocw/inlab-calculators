@@ -9,7 +9,7 @@ export interface SavedCalculation {
 
 export class CalculationParser {
   // Parse universal de valores monetários brasileiros
-  static parseValue(value: unknown, fieldName?: string): number {
+  static parseValue(value: unknown): number {
     if (value === null || value === undefined) return 0
     if (typeof value === 'number') return isNaN(value) ? 0 : value
     

@@ -14,7 +14,7 @@ interface PublicLoginModalProps {
   isInline?: boolean
 }
 
-export function PublicLoginModal({ onSuccess, onCancel, isInline = false }: PublicLoginModalProps) {
+export function PublicLoginModal({ onSuccess, onCancel }: PublicLoginModalProps) {
   const [step, setStep] = useState<'email' | 'code'>('email')
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
@@ -37,7 +37,7 @@ export function PublicLoginModal({ onSuccess, onCancel, isInline = false }: Publ
       } else {
         toast.error((result && 'error' in result && result.error) || 'Erro ao enviar código')
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao enviar código. Tente novamente.')
     }
   }
@@ -56,7 +56,7 @@ export function PublicLoginModal({ onSuccess, onCancel, isInline = false }: Publ
       } else {
         toast.error((result && 'error' in result && result.error) || 'Código inválido')
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao verificar código. Tente novamente.')
     }
   }

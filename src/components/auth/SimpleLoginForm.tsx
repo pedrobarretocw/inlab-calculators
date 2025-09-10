@@ -41,7 +41,7 @@ export function SimpleLoginForm({ onSuccess }: SimpleLoginFormProps) {
       } else {
         toast.error((result && result.error) || 'Erro ao enviar código')
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao enviar código. Tente novamente.')
     }
   }
@@ -63,7 +63,7 @@ export function SimpleLoginForm({ onSuccess }: SimpleLoginFormProps) {
       } else {
         toast.error((result && result.error) || 'Código inválido')
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao verificar código. Tente novamente.')
     } finally {
       setIsVerifying(false)
@@ -84,7 +84,7 @@ export function SimpleLoginForm({ onSuccess }: SimpleLoginFormProps) {
       } else {
         toast.error((result && result.error) || 'Erro ao reenviar código')
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao reenviar código. Tente novamente.')
     } finally {
       setIsResending(false)

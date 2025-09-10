@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { format, subDays, startOfDay } from 'date-fns'
 import { isRealAdminUser } from '@/lib/clerk-jwt-utils'
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // VERIFICAÇÃO DUPLA: BLOQUEIA USUÁRIOS PÚBLICOS
     const isAdmin = await isRealAdminUser()

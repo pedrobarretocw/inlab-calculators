@@ -12,7 +12,7 @@ export interface InlineValidationErrorProps {
   showImage?: boolean
 }
 
-export function InlineValidationError({ isVisible, onClose, title, message, showImage = true }: InlineValidationErrorProps) {
+export function InlineValidationError({ isVisible, onClose, title, message }: InlineValidationErrorProps) {
   // Auto-dismiss após 4 segundos
   React.useEffect(() => {
     if (isVisible) {

@@ -3,31 +3,29 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CalculatorCardWrapper } from '@/components/ui/calculator-card-wrapper'
 import { CalculationParser } from '@/lib/calculation-parser'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { InfoIcon, Calendar, Clock, ArrowLeft, Home, Grid3X3, BookmarkCheck, RotateCcw } from 'lucide-react'
+import { InfoIcon, Calendar, Clock, RotateCcw } from 'lucide-react'
 import { CalculationResult } from './CalculationResult'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { NumberInput } from '@/components/ui/number-input'
 import { feriasSchema, type FeriasInput } from '@/lib/schemas'
 import { calcularFerias } from '@/lib/calculations'
-import { formatCurrency } from '@/lib/format'
+// import { formatCurrency } from '@/lib/format'
 import { track } from '@/lib/tracking'
 import { type FeriasResult } from '@/lib/types'
-import { showValidationErrors, showCalculationSuccess } from '@/lib/validation-feedback'
+import { showCalculationSuccess } from '@/lib/validation-feedback'
 import { InlineToastContainer } from '@/components/ui/inline-toast'
 import { CalculatorErrorToastContainer } from '@/components/ui/calculator-error-toast'
 import { InlineValidationError } from '@/components/ui/inline-validation-error'
-import { ViewSavedCalculationsButton } from './ViewSavedCalculationsButton'
 import { SavedCalculationsView } from './SavedCalculationsView'
 import { useCalculationResult } from '@/hooks/useCalculationResult'
 import { useCalculator } from '@/contexts/CalculatorContext'
-import { useUser } from '@clerk/nextjs'
-import { PublicLoginModal } from '@/components/auth/PublicLoginModal'
+ 
 
 
 
@@ -41,16 +39,13 @@ interface FeriasProps {
 
 }
 
-export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, showBackButton, onBack }: FeriasProps) {
+export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug }: FeriasProps) {
   const [hasStarted, setHasStarted] = useState(false)
   const [showSavedCalculations, setShowSavedCalculations] = useState(false)
-  const [showEmailCapture, setShowEmailCapture] = useState(false)
-  const [showLoginModal, setShowLoginModal] = useState(false)
   const [fadeClass, setFadeClass] = useState('opacity-100')
 
   // Hooks
-  const { showHome, showCalculatorHome } = useCalculator()
-  const { user } = useUser()
+  const { showHome } = useCalculator()
   const calculationResult = useCalculationResult('ferias')
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationMessage, setValidationMessage] = useState('')
@@ -350,33 +345,7 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
           </CardContent>
         </CalculatorCardWrapper>
 
-        {/* Modal de Login Simplificado */}
-        {showEmailCapture && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/5 backdrop-blur-sm rounded-lg">
-            <Card className="w-full max-w-sm mx-4 border border-gray-200/60">
-              <CardHeader>
-                <CardTitle className="text-lg">Faça login para continuar</CardTitle>
-                <CardDescription className="text-sm">
-                  Entre na sua conta para ver seus cálculos salvos
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button
-                  onClick={() => window.location.href = '/calculadoras/login'}
-                  className="w-full bg-[#BAFF1B] text-black hover:bg-[#A8E616]"
-                >
-                  Fazer Login
-                </Button>
-                <button
-                  onClick={() => setShowEmailCapture(false)}
-                  className="w-full text-xs text-gray-500 hover:text-gray-700"
-                >
-                  Voltar
-                </button>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {/* Modal de Login removido (código não utilizado) */}
 
         {/* Overlay de Resultados */}
         <CalculationResult
@@ -397,26 +366,6 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug, 
 
       </div>
 
-      {/* Modal de Login - Dentro do card, estilo Apple */}
-      {showLoginModal && (
-        <div className="absolute inset-0 z-10 rounded-lg overflow-hidden">
-          <div 
-            className="h-full border border-gray-200/60 shadow-none backdrop-blur-xl rounded-lg"
-            style={{ 
-              backgroundColor: '#F5F5F5',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1)'
-            }}
-          >
-            <div className="p-6 h-full flex flex-col justify-center">
-              <PublicLoginModal
-                onSuccess={() => setShowLoginModal(false)}
-                onCancel={() => setShowLoginModal(false)}
-                isInline={true}
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </TooltipProvider>
   )
 }

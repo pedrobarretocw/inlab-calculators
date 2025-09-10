@@ -3,30 +3,28 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CalculatorCardWrapper } from '@/components/ui/calculator-card-wrapper'
 import { CalculationParser } from '@/lib/calculation-parser'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { InfoIcon, User, Coffee, Car, Shield, Gift, ArrowLeft, RotateCcw } from 'lucide-react'
+import { InfoIcon, RotateCcw } from 'lucide-react'
 import { CalculationResult } from './CalculationResult'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { custoFuncionarioSchema, type CustoFuncionarioInput } from '@/lib/schemas'
 import { calcularCustoFuncionario } from '@/lib/calculations'
-import { formatCurrency } from '@/lib/format'
+// import { formatCurrency } from '@/lib/format'
 import { track } from '@/lib/tracking'
 import { type CustoFuncionarioResult } from '@/lib/types'
-import { showValidationErrors, showCalculationSuccess } from '@/lib/validation-feedback'
+import { showCalculationSuccess } from '@/lib/validation-feedback'
 import { InlineToastContainer } from '@/components/ui/inline-toast'
 import { CalculatorErrorToastContainer } from '@/components/ui/calculator-error-toast'
 import { InlineValidationError } from '@/components/ui/inline-validation-error'
-import { ViewSavedCalculationsButton } from './ViewSavedCalculationsButton'
 import { SavedCalculationsView } from './SavedCalculationsView'
 import { useCalculationResult } from '@/hooks/useCalculationResult'
 import { useCalculator } from '@/contexts/CalculatorContext'
-import { useUser } from '@clerk/nextjs'
-import { PublicLoginModal } from '@/components/auth/PublicLoginModal'
+ 
 
 
 interface CustoFuncionarioProps {
@@ -34,21 +32,16 @@ interface CustoFuncionarioProps {
   onStart?: () => void
   variant?: string
   articleSlug?: string
-  showBackButton?: boolean
-  onBack?: () => void
 
 }
 
-export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcionario', articleSlug, showBackButton, onBack }: CustoFuncionarioProps) {
+export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcionario', articleSlug }: CustoFuncionarioProps) {
   const [hasStarted, setHasStarted] = useState(false)
   const [showSavedCalculations, setShowSavedCalculations] = useState(false)
-  const [showEmailCapture, setShowEmailCapture] = useState(false)
-  const [showLoginModal, setShowLoginModal] = useState(false)
   const [fadeClass, setFadeClass] = useState('opacity-100')
 
   // Hooks
   const { showHome } = useCalculator()
-  const { user } = useUser()
   const calculationResult = useCalculationResult('custo-funcionario')
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationMessage, setValidationMessage] = useState('')
@@ -140,11 +133,7 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
     }
   }
 
-  const handleReset = () => {
-    calculationResult.reset()
-    form.reset()
-    setHasStarted(false)
-  }
+  // handleReset removido (não utilizado)
 
 
 
@@ -420,32 +409,12 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
           calculatorType={calculationResult.result.isFromSaved ? calculationResult.result.savedType : "custo-funcionario"}
           calculationData={form.getValues()}
           onShowSavedCalculations={() => setShowSavedCalculations(true)}
-          onShowCalculatorHome={() => showHome()}
           isFromSavedCalculation={calculationResult.result.isFromSaved}
           savedCalculationType={calculationResult.result.savedType}
         />
       </div>
 
-      {/* Modal de Login - Dentro do card, estilo Apple */}
-      {showLoginModal && (
-        <div className="absolute inset-0 z-10 rounded-lg overflow-hidden">
-          <div 
-            className="h-full border border-gray-200/60 shadow-none backdrop-blur-xl rounded-lg"
-            style={{ 
-              backgroundColor: '#F5F5F5',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1)'
-            }}
-          >
-            <div className="p-6 h-full flex flex-col justify-center">
-              <PublicLoginModal
-                onSuccess={() => setShowLoginModal(false)}
-                onCancel={() => setShowLoginModal(false)}
-                isInline={true}
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal de Login removido (código não utilizado) */}
     </TooltipProvider>
   )
 }

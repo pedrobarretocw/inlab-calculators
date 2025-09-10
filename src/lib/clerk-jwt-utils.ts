@@ -10,7 +10,7 @@ export async function isRealAdminUser(): Promise<boolean> {
     } else {
       return false
     }
-  } catch (error) {
+  } catch {
     return false
   }
 }

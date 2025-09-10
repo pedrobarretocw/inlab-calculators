@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { RotateCcw, Calculator, Save, Mail, ArrowLeft, Sparkles, CheckCircle, History, Home } from 'lucide-react'
+import { RotateCcw, Save, Mail, ArrowLeft, Sparkles, History, Home } from 'lucide-react'
 import { toast } from 'sonner'
 import { PublicClerkProvider } from '@/components/auth/PublicClerkProvider'
 import { usePublicAuth } from '@/hooks/usePublicAuth'
@@ -25,7 +25,6 @@ interface CalculationResultProps {
   calculatorType?: string
   calculationData?: Record<string, number | string | boolean>
   onShowSavedCalculations?: () => void
-  onShowCalculatorHome?: () => void
   isFromSavedCalculation?: boolean
   savedCalculationType?: string // Tipo real do cálculo salvo (se diferente do atual)
 }
@@ -61,7 +60,6 @@ function CalculationResultContent({
   calculatorType, 
   calculationData,
   onShowSavedCalculations,
-  onShowCalculatorHome,
   isFromSavedCalculation = false,
   savedCalculationType
 }: CalculationResultProps) {
@@ -69,7 +67,7 @@ function CalculationResultContent({
   // LOG PARA DEBUG
   // Logs removidos para limpar console
   
-  const { showHome, refreshSavedCalculations, addSavedCalculation } = useCalculator()
+  const { showHome, addSavedCalculation } = useCalculator()
   
   const [showEmailCapture, setShowEmailCapture] = useState(false)
   const [actionType, setActionType] = useState<'save' | 'reset'>('save')
@@ -82,9 +80,9 @@ function CalculationResultContent({
   const [isVerifying, setIsVerifying] = useState(false)
   const [isResending, setIsResending] = useState(false)
   
-  const { user, isLoaded, isLoading, error, signInWithEmail, verifyCode } = usePublicAuth()
+  const { user, isLoaded, isLoading, signInWithEmail, verifyCode } = usePublicAuth()
 
-  const saveCalculation = async (currentEmail: string, currentActionType: 'save' | 'reset') => {
+  const saveCalculation = async (currentEmail: string) => {
     // Criar objeto do cálculo salvo
     const newCalculation = {
       id: crypto.randomUUID(),
@@ -159,11 +157,11 @@ function CalculationResultContent({
         } else {
           // Falha ao adicionar email
         }
-      }).catch(error => {
-        // Erro inesperado ao adicionar no ActiveCampaign
+      }).catch(() => {
+        // erro silencioso
       })
-    } catch (error) {
-      // Erro ao iniciar salvamento
+    } catch {
+      // erro silencioso
     }
   }
 
@@ -186,7 +184,7 @@ function CalculationResultContent({
   const handleSaveWithName = async () => {
     if (user && isLoaded) {
       const userEmail = user.emailAddresses?.[0]?.emailAddress || 'user@example.com'
-      await saveCalculation(userEmail, 'save')
+      await saveCalculation(userEmail)
       setShowNameModal(false)
       setCalculationName('') // Limpar o campo
     }
@@ -222,30 +220,12 @@ function CalculationResultContent({
       } else {
         toast.error((result && result.error) || 'Erro ao enviar código')
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao enviar código. Tente novamente.')
     }
   }
 
-  const handleCodeSubmit = async () => {
-    if (!verificationCode.trim()) {
-      toast.error('Por favor, digite o código de verificação')
-      return
-    }
-
-    try {
-      const result = await verifyCode(verificationCode.trim(), authMode)
-      
-      if (result && result.success) {
-        // Sucesso - salvar e ir para Meus Cálculos
-        await saveCalculation(email, actionType)
-      } else {
-        toast.error((result && result.error) || 'Código inválido')
-      }
-    } catch (error) {
-      toast.error('Erro ao verificar código. Tente novamente.')
-    }
-  }
+  // handleCodeSubmit removido por não ser utilizado
 
   const handleBackFromEmail = () => {
     setShowEmailCapture(false)
@@ -267,7 +247,7 @@ function CalculationResultContent({
       
       if (result && result.success) {
         // Sucesso - salvar e ir para Meus Cálculos
-        await saveCalculation(email, actionType)
+        await saveCalculation(email)
       } else {
         toast.error((result && result.error) || 'Código inválido')
       }
@@ -289,7 +269,7 @@ function CalculationResultContent({
       } else {
         toast.error((result && result.error) || 'Erro ao reenviar código')
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao reenviar código. Tente novamente.')
     } finally {
       setIsResending(false)
@@ -561,7 +541,9 @@ function CalculationResultContent({
             variant="ghost"
             size="sm"
             onClick={() => {
-              onShowSavedCalculations && onShowSavedCalculations()
+              if (onShowSavedCalculations) {
+                onShowSavedCalculations()
+              }
             }}
             className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full hover:bg-gray-100 transition-colors"
           >

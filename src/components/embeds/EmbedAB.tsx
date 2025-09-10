@@ -59,7 +59,7 @@ function EmbedABContent({ articleSlug }: EmbedABProps) {
     }
   }
   
-  const handleCalculate = (result: unknown) => {
+  const handleCalculate = () => {
     // Could trigger save flow here
   }
   

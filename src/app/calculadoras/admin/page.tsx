@@ -6,8 +6,7 @@ import { ABTestReport } from '@/components/dashboard/ABTestReport'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { BarChart3, Users, Calculator, TrendingUp, Settings, TestTube } from 'lucide-react'
-import Link from 'next/link'
+import { BarChart3, Calculator } from 'lucide-react'
 
 // Admin Header Component separado como client component
 import AdminHeader from '@/components/admin/AdminHeader'

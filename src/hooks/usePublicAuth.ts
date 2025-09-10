@@ -53,7 +53,7 @@ export function usePublicAuth() {
             setIsLoading(false)
             return { success: true, mode: 'signin' as const }
           }
-        } catch (signInErr: unknown) {
+        } catch {
           setError('Erro ao fazer login. Tente novamente.')
           setIsLoading(false)
           return { success: false, error: 'Erro ao fazer login' }

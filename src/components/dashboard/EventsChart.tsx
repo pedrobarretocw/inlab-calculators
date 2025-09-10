@@ -1,4 +1,3 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { EventsChartClient } from './EventsChartClient'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { format, subDays, startOfDay } from 'date-fns'

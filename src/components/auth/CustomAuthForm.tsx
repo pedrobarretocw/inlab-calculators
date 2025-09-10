@@ -46,7 +46,7 @@ function AuthForm({ title, description, redirectTo, requireDomainValidation, val
 
       setDomainError(null)
       return true
-    } catch (error) {
+    } catch {
       setDomainError('Unable to validate domain. Please try again.')
       return false
     }
@@ -105,7 +105,7 @@ function AuthForm({ title, description, redirectTo, requireDomainValidation, val
           } else {
             setDomainError('Email verification not available for this account. Please contact support.')
           }
-        } catch (signInErr: unknown) {
+        } catch {
           setDomainError('Unable to send verification code. Please try again.')
         }
       } else {
@@ -195,7 +195,7 @@ function AuthForm({ title, description, redirectTo, requireDomainValidation, val
       }
 
       setDomainError(null)
-    } catch (error: unknown) {
+    } catch {
       setDomainError('Failed to resend code. Please try again.')
     } finally {
       setResendLoading(false)

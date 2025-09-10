@@ -41,14 +41,7 @@ interface CreateContactResponse {
   contact: ActiveCampaignContact
 }
 
-interface AddToListResponse {
-  contactList: {
-    contact: string
-    list: string
-    status: number
-    sdate: string
-  }
-}
+// Removed AddToListResponse (unused)
 
 /**
  * Classe para interação com a API do ActiveCampaign
@@ -201,7 +194,7 @@ export class ActiveCampaignService {
         return false
       }
 
-      const data: AddToListResponse = await response.json()
+      await response.json()
       return true
     } catch (error) {
       console.error('[ActiveCampaign] Erro ao adicionar contato à lista:', error)

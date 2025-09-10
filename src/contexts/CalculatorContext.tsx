@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode } from 'react'
 // import { usePublicAuth } from '@/hooks/usePublicAuth' // Removido para evitar dependência global
 
 type CalculatorType = 'ferias' | 'custo-funcionario' | '13o-salario'
@@ -74,7 +74,7 @@ export function CalculatorProvider({ children, initialCalculator }: CalculatorPr
         console.log('❌ CONTEXT: Erro na API, limpando dados')
         setSavedCalculations([])
       }
-    } catch (error) {
+    } catch {
       setSavedCalculations([])
     } finally {
       setLoadingSavedCalculations(false)

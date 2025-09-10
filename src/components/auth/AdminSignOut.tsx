@@ -18,7 +18,7 @@ export default function AdminSignOut() {
         toast.success("Logout realizado com sucesso!")
         router.push("/calculadoras/admin/login")
       })
-    } catch (error) {
+    } catch {
       toast.error("Erro ao fazer logout. Tente novamente.")
     } finally {
       setIsLoggingOut(false)

@@ -6,7 +6,7 @@ import { CustoFuncionario } from '@/components/calculators/CustoFuncionario'
 import { DecimoTerceiro } from '@/components/calculators/DecimoTerceiro'
 import { CalculatorHome } from '@/components/calculators/CalculatorHome'
 import { CalculatorSkeleton } from '@/components/ui/CalculatorSkeleton'
-import { CalculatorProvider, useCalculator } from '@/contexts/CalculatorContext'
+import { useCalculator } from '@/contexts/CalculatorContext'
 import { PublicClerkProvider } from '@/components/auth/PublicClerkProvider'
 
 interface EmbedAllProps {
@@ -15,7 +15,7 @@ interface EmbedAllProps {
 }
 
 function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: string; initialCalculator?: string }) {
-  const { selectedCalculator, showCalculatorHome, selectCalculator, navigateToCarousel } = useCalculator()
+  const { selectedCalculator, showCalculatorHome, selectCalculator } = useCalculator()
   const [fadeClass, setFadeClass] = useState('opacity-100')
   const [isLoading, setIsLoading] = useState(true)
   const [hasInitialized, setHasInitialized] = useState(false)
@@ -52,7 +52,7 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
     )
   }
 
-  const handleCalculate = (result: unknown) => {
+  const handleCalculate = () => {
     // Calculation completed
   }
   
@@ -68,13 +68,7 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
     }, 150)
   }
   
-  const handleBackToHome = () => {
-    setFadeClass('opacity-0')
-    setTimeout(() => {
-      navigateToCarousel()
-      setFadeClass('opacity-100')
-    }, 150)
-  }
+  // handleBackToHome removido (não utilizado)
 
 
   
@@ -101,8 +95,6 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
               onStart={handleStart}
               variant="ferias-all"
               articleSlug={articleSlug}
-              showBackButton={false}
-              onBack={handleBackToHome}
             />
           )}
 
@@ -113,8 +105,6 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
               onStart={handleStart}
               variant="custo-funcionario-all"
               articleSlug={articleSlug}
-              showBackButton={false}
-              onBack={handleBackToHome}
             />
           )}
           
@@ -125,8 +115,6 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
               onStart={handleStart}
               variant="13o-salario-all"
               articleSlug={articleSlug}
-              showBackButton={false}
-              onBack={handleBackToHome}
             />
           )}
         </div>

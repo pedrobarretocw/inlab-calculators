@@ -1,11 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Calculator, Calendar, ChevronDown, ChevronRight, Home, Trash2, LogOut, User } from 'lucide-react'
-import { formatCurrency } from '@/lib/format'
-import { useUser, useClerk } from '@clerk/nextjs'
+import { ArrowLeft, Calculator, Home, Trash2, LogOut, User } from 'lucide-react'
+import { useClerk } from '@clerk/nextjs'
 import { PublicClerkProvider } from '@/components/auth/PublicClerkProvider'
 import { SimpleLoginForm } from '@/components/auth/SimpleLoginForm'
 import { usePublicAuth } from '@/hooks/usePublicAuth'
@@ -23,16 +21,14 @@ interface SavedCalculation {
 interface SavedCalculationsViewProps {
   onBack: () => void
   onSelectCalculation?: (calculation: SavedCalculation) => void
-  onShowCalculatorHome?: () => void
 }
 
-function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculatorHome }: SavedCalculationsViewProps) {
+function SavedCalculationsContent({ onBack, onSelectCalculation }: SavedCalculationsViewProps) {
   const { user, isLoaded } = usePublicAuth()
-  const { signOut, setActive } = useClerk()
+  const { setActive } = useClerk()
   const { showHome, savedCalculations, loadingSavedCalculations, refreshSavedCalculations, deleteCalculation } = useCalculator()
   
   // Dados dos cálculos salvos vêm do contexto
-  const [showLoginModal, setShowLoginModal] = useState(false)
   const [showLogoutMenu, setShowLogoutMenu] = useState(false)
 
   const handleLogout = async () => {
@@ -58,11 +54,11 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
       }
     }
     // SEMPRE vai para Meus Cálculos, logado ou não
-  }, [user, isLoaded])
+  }, [user, isLoaded, refreshSavedCalculations])
 
   // Fechar menu de logout quando clicar fora
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = () => {
       if (showLogoutMenu) {
         setShowLogoutMenu(false)
       }
@@ -164,13 +160,7 @@ function SavedCalculationsContent({ onBack, onSelectCalculation, onShowCalculato
   }
 
   const handleLoginSuccess = () => {
-    setShowLoginModal(false)
     // O usePublicAuth vai detectar automaticamente a mudança de user
-  }
-
-  const handleLoginCancel = () => {
-    setShowLoginModal(false)
-    onBack()
   }
 
 

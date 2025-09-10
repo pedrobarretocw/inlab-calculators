@@ -3,31 +3,29 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CalculatorCardWrapper } from '@/components/ui/calculator-card-wrapper'
 import { CalculationParser } from '@/lib/calculation-parser'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { InfoIcon, Calendar, Star, ArrowLeft, Home, RotateCcw } from 'lucide-react'
+import { InfoIcon, Calendar, RotateCcw } from 'lucide-react'
 import { CalculationResult } from './CalculationResult'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { NumberInput } from '@/components/ui/number-input'
 import { decimoTerceiroSchema, type DecimoTerceiroInput } from '@/lib/schemas'
 import { calcularDecimoTerceiro } from '@/lib/calculations'
-import { formatCurrency } from '@/lib/format'
+// import { formatCurrency } from '@/lib/format'
 import { track } from '@/lib/tracking'
 import { type DecimoTerceiroResult } from '@/lib/types'
-import { showValidationErrors, showCalculationSuccess } from '@/lib/validation-feedback'
+import { showCalculationSuccess } from '@/lib/validation-feedback'
 import { InlineToastContainer } from '@/components/ui/inline-toast'
 import { CalculatorErrorToastContainer } from '@/components/ui/calculator-error-toast'
 import { InlineValidationError } from '@/components/ui/inline-validation-error'
-import { ViewSavedCalculationsButton } from './ViewSavedCalculationsButton'
 import { SavedCalculationsView } from './SavedCalculationsView'
 import { useCalculationResult } from '@/hooks/useCalculationResult'
 import { useCalculator } from '@/contexts/CalculatorContext'
-import { useUser } from '@clerk/nextjs'
-import { PublicLoginModal } from '@/components/auth/PublicLoginModal'
+ 
 
 
 interface DecimoTerceiroProps {
@@ -35,21 +33,16 @@ interface DecimoTerceiroProps {
   onStart?: () => void
   variant?: string
   articleSlug?: string
-  showBackButton?: boolean
-  onBack?: () => void
 
 }
 
-export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', articleSlug, showBackButton, onBack }: DecimoTerceiroProps) {
+export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', articleSlug }: DecimoTerceiroProps) {
   const [hasStarted, setHasStarted] = useState(false)
   const [showSavedCalculations, setShowSavedCalculations] = useState(false)
-  const [showEmailCapture, setShowEmailCapture] = useState(false)
-  const [showLoginModal, setShowLoginModal] = useState(false)
   const [fadeClass, setFadeClass] = useState('opacity-100')
 
   // Hooks
   const { showHome } = useCalculator()
-  const { user } = useUser()
   const calculationResult = useCalculationResult('13o-salario')
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationMessage, setValidationMessage] = useState('')
@@ -316,33 +309,7 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
           </CardContent>
         </CalculatorCardWrapper>
 
-        {/* Modal de Login Simplificado */}
-        {showEmailCapture && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/5 backdrop-blur-sm rounded-lg">
-            <Card className="w-full max-w-sm mx-4 border border-gray-200/60">
-              <CardHeader>
-                <CardTitle className="text-lg">Faça login para continuar</CardTitle>
-                <CardDescription className="text-sm">
-                  Entre na sua conta para ver seus cálculos salvos
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button
-                  onClick={() => window.location.href = '/calculadoras/login'}
-                  className="w-full bg-[#BAFF1B] text-black hover:bg-[#A8E616]"
-                >
-                  Fazer Login
-                </Button>
-                <button
-                  onClick={() => setShowEmailCapture(false)}
-                  className="w-full text-xs text-gray-500 hover:text-gray-700"
-                >
-                  Voltar
-                </button>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {/* Modal de Login removido (código não utilizado) */}
 
         {/* Overlay de Resultados */}
         <CalculationResult
@@ -353,32 +320,12 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
           calculatorType={calculationResult.result.isFromSaved ? calculationResult.result.savedType : "13o-salario"}
           calculationData={form.getValues()}
           onShowSavedCalculations={() => setShowSavedCalculations(true)}
-          onShowCalculatorHome={() => showHome()}
           isFromSavedCalculation={calculationResult.result.isFromSaved}
           savedCalculationType={calculationResult.result.savedType}
         />
       </div>
 
-      {/* Modal de Login - Dentro do card, estilo Apple */}
-      {showLoginModal && (
-        <div className="absolute inset-0 z-10 rounded-lg overflow-hidden">
-          <div 
-            className="h-full border border-gray-200/60 shadow-none backdrop-blur-xl rounded-lg"
-            style={{ 
-              backgroundColor: '#F5F5F5',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1)'
-            }}
-          >
-            <div className="p-6 h-full flex flex-col justify-center">
-              <PublicLoginModal
-                onSuccess={() => setShowLoginModal(false)}
-                onCancel={() => setShowLoginModal(false)}
-                isInline={true}
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal de Login removido (código não utilizado) */}
     </TooltipProvider>
   )
 }

@@ -7,11 +7,6 @@ import { Eye, Copy } from 'lucide-react'
 import { toast } from 'sonner'
 import dynamic from 'next/dynamic'
 
-// Importar calculadoras dinamicamente
-const Ferias = dynamic(() => import('@/components/calculators/Ferias').then(mod => ({ default: mod.Ferias })), { ssr: false })
-
-const CustoFuncionario = dynamic(() => import('@/components/calculators/CustoFuncionario').then(mod => ({ default: mod.CustoFuncionario })), { ssr: false })
-const DecimoTerceiro = dynamic(() => import('@/components/calculators/DecimoTerceiro').then(mod => ({ default: mod.DecimoTerceiro })), { ssr: false })
 const EmbedAll = dynamic(() => import('@/components/embeds/EmbedAll').then(mod => ({ default: mod.EmbedAll })), { ssr: false })
 
 interface CalculatorModalProps {
@@ -52,7 +47,7 @@ export function CalculatorModal({ calculatorSlug, calculatorName, embedType }: C
     try {
       await navigator.clipboard.writeText(embedCode)
       toast.success(successMessage)
-    } catch (error) {
+    } catch {
       toast.error('Failed to copy embed code')
     }
   }

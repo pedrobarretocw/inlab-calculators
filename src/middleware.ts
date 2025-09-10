@@ -81,7 +81,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
       return NextResponse.next()
       
-    } catch (error) {
+    } catch {
       
       // Se for API, retornar JSON ao invés de redirect
       if (req.nextUrl.pathname.startsWith('/api/')) {
