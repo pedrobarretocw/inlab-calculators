@@ -25,7 +25,7 @@ export function CalculatorCardWrapper({
           className
         )}
       >
-        <div className="h-full overflow-hidden">
+        <div className="h-full overflow-hidden flex flex-col">
           {children}
         </div>
       </Card>

@@ -7,8 +7,8 @@ interface CalculatorStats {
   calculator_slug: string
   views: number
   calculations: number
-  conversions: number
-  conversion_rate: number
+  leads: number
+  lead_rate: number
 }
 
 export async function TopCalculators() {
@@ -43,15 +43,15 @@ export async function TopCalculators() {
     const stats: CalculatorStats[] = calculatorSlugs.map(slug => {
       const views = viewData?.filter(e => e.calculator_slug === slug).length || 0
       const calculations = calcData?.filter(e => e.calculator_slug === slug).length || 0
-      const conversions = convData?.filter(e => e.calculator_slug === slug).length || 0
-      const conversion_rate = calculations > 0 ? (conversions / calculations) * 100 : 0
+      const leads = convData?.filter(e => e.calculator_slug === slug).length || 0
+      const lead_rate = calculations > 0 ? (leads / calculations) * 100 : 0
       
       return {
         calculator_slug: slug,
         views,
         calculations,
-        conversions,
-        conversion_rate
+        leads,
+        lead_rate
       }
     })
     
@@ -78,8 +78,8 @@ export async function TopCalculators() {
                 <TableHead>Calculator</TableHead>
                 <TableHead className="text-center">Views</TableHead>
                 <TableHead className="text-center">Calculations</TableHead>
-                <TableHead className="text-center">Conversions</TableHead>
-                <TableHead className="text-center">CR</TableHead>
+                <TableHead className="text-center">Leads</TableHead>
+                <TableHead className="text-center">Lead Rate</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -95,14 +95,14 @@ export async function TopCalculators() {
                     {formatNumber(stat.calculations)}
                   </TableCell>
                   <TableCell className="text-center">
-                    {formatNumber(stat.conversions)}
+                    {formatNumber(stat.leads)}
                   </TableCell>
                   <TableCell className="text-center">
                     <span className={`font-medium ${
-                      stat.conversion_rate > 6 ? 'text-green-600' : 
-                      stat.conversion_rate > 4 ? 'text-yellow-600' : 'text-red-600'
+                      stat.lead_rate > 6 ? 'text-green-600' : 
+                      stat.lead_rate > 4 ? 'text-yellow-600' : 'text-red-600'
                     }`}>
-                      {stat.conversion_rate.toFixed(1)}%
+                      {stat.lead_rate.toFixed(1)}%
                     </span>
                   </TableCell>
                 </TableRow>

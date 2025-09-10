@@ -21,17 +21,13 @@ interface SavedCalculationsViewProps {
 }
 
 function SavedCalculationsContent({ onBack, onSelectCalculation }: SavedCalculationsViewProps) {
-  const { showHome, savedCalculations, loadingSavedCalculations, refreshSavedCalculations, deleteCalculation } = useCalculator()
+  const { showHome, savedCalculations, loadingSavedCalculations, deleteCalculation } = useCalculator()
   const [showLogoutMenu, setShowLogoutMenu] = useState(false)
 
   const handleLogout = async () => {}
  
   useEffect(() => {
-    const leadEmail = typeof window !== 'undefined' ? localStorage.getItem('leadEmail') : null
-    if (leadEmail) {
-      refreshSavedCalculations(leadEmail)
-    }
-  }, [refreshSavedCalculations])
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -182,42 +178,7 @@ function SavedCalculationsContent({ onBack, onSelectCalculation }: SavedCalculat
             Meus Cálculos
           </h2>
         </div>
-        {false && (
-          <div className="absolute right-12 top-1/2 transform -translate-y-1/2 z-50">
-            <div className="relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowLogoutMenu(!showLogoutMenu)
-                }}
-                className="h-6 w-6 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center group"
-              >
-                <User className="h-3.5 w-3.5 text-gray-500 group-hover:text-gray-700" />
-              </button>
-              {showLogoutMenu && (
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="absolute right-0 top-7 bg-white border border-gray-300 rounded-lg py-2 px-1 min-w-[160px] z-[999999]"
-                  style={{
-                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
-                    zIndex: 999999
-                  }}
-                >
-                  <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-100">
-                    {user?.emailAddresses?.[0]?.emailAddress || 'Email não encontrado'}
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
-                  >
-                    <LogOut className="h-3 w-3" />
-                    Sair da conta
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Menu de logout desativado */}
       </div>
       <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 pb-4 pt-3">
         {savedCalculations.length === 0 ? (

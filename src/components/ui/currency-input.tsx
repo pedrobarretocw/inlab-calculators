@@ -54,7 +54,8 @@ export function CurrencyInput({
               "placeholder:text-muted-foreground",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              "pl-10 pr-4 py-3 text-base font-medium transition-all duration-200",
+              // Compact height and font for tighter vertical spacing
+              "pl-10 pr-3 py-2 text-sm font-medium transition-all duration-200",
               "border-gray-200 focus:border-green-400 focus:ring-green-400/20 focus:ring-2",
               "bg-white hover:bg-gray-50/50 focus:bg-white",
               "tabular-nums"

@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { RotateCcw, Save, Mail, ArrowLeft, History, Home } from 'lucide-react'
-import { toast } from 'sonner'
+import { RotateCcw, Save, ArrowLeft, Home, History } from 'lucide-react'
+import { EmailCaptureModal } from '@/components/ui/email-capture-modal'
 import { useCalculator } from '@/contexts/CalculatorContext'
+ 
 // import { addEmailToActiveCampaign } from '@/lib/activecampaign' // Movido para API route
 
 
@@ -22,7 +23,7 @@ interface CalculationResultProps {
   isVisible: boolean
   calculatorType?: string
   calculationData?: Record<string, number | string | boolean>
-  onShowSavedCalculations?: () => void
+  onBackToCalculator?: () => void
   isFromSavedCalculation?: boolean
   savedCalculationType?: string // Tipo real do cálculo salvo (se diferente do atual)
 }
@@ -57,16 +58,14 @@ function CalculationResultContent({
   isVisible, 
   calculatorType, 
   calculationData,
-  onShowSavedCalculations,
+  onBackToCalculator,
   isFromSavedCalculation = false,
   savedCalculationType
 }: CalculationResultProps) {
   
   const { showHome, addSavedCalculation } = useCalculator()
   
-  const [showEmailCapture, setShowEmailCapture] = useState(false)
-  const [actionType, setActionType] = useState<'save' | 'reset'>('save')
-  const [email, setEmail] = useState('')
+  const [showSaveLeadModal, setShowSaveLeadModal] = useState(false)
   
   const [calculationName, setCalculationName] = useState('')
   const [showNameModal, setShowNameModal] = useState(false)
@@ -92,12 +91,8 @@ function CalculationResultContent({
     // Pequeno delay para dar tempo do contexto atualizar
     await new Promise(resolve => setTimeout(resolve, 300))
     
-    // Fechar modal e ir para Meus Cálculos
-    setShowEmailCapture(false)
+    // Fechar modal e permanecer na calculadora
     setCalculationName('')
-    if (onShowSavedCalculations) {
-      onShowSavedCalculations()
-    }
 
     // Extrair nome do email para ActiveCampaign
     const emailParts = currentEmail.split('@')
@@ -160,15 +155,7 @@ function CalculationResultContent({
 
   // Funções definidas antes dos retornos condicionais
   const handleSaveClick = async () => {
-    setActionType('save')
-    
-    const leadEmail = typeof window !== 'undefined' ? localStorage.getItem('leadEmail') : null
-    if (leadEmail) {
-      setShowNameModal(true)
-      return
-    }
-    
-    setShowEmailCapture(true)
+    setShowSaveLeadModal(true)
   }
 
   const handleSaveWithName = async () => {
@@ -179,52 +166,10 @@ function CalculationResultContent({
   }
 
   const handleResetClick = async () => {
-    setActionType('reset')
-    
-    const leadEmail = typeof window !== 'undefined' ? localStorage.getItem('leadEmail') : null
-    if (leadEmail) {
-      onReset()
-      return
-    }
-    
-    setShowEmailCapture(true)
+    onReset()
   }
 
-  const handleEmailSubmit = async () => {
-    if (!email.trim()) {
-      toast.error('Por favor, digite seu email')
-      return
-    }
-
-    try {
-      await fetch('/api/add-to-activecampaign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() })
-      })
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('leadEmail', email.trim())
-      }
-      setShowEmailCapture(false)
-      toast.success('Email registrado com sucesso!')
-    } catch {
-      toast.error('Erro ao enviar email. Tente novamente.')
-    }
-  }
-
-  // handleCodeSubmit removido por não ser utilizado
-
-  const handleBackFromEmail = () => {
-    setShowEmailCapture(false)
-    setEmail('')
-    setCalculationName('')
-  }
-  
-
-  const handleSkipSave = () => {
-    setShowEmailCapture(false)
-    setCalculationName('') // Limpar o nome
-  }
+  // Email capture handled by EmailCaptureModal
 
   if (!isVisible) return null
 
@@ -303,78 +248,38 @@ function CalculationResultContent({
 
 
 
-  // Tela de captura de email - Compacta para 500px
-  if (showEmailCapture) {
+  // Email capture for Save (use the "Seja avisado quando lançar" modal)
+  if (showSaveLeadModal) {
     return (
-      <div className="absolute inset-0 z-10 rounded-lg overflow-hidden">
-        <Card 
-          className="h-full border border-gray-200/60 shadow-none backdrop-blur-xl"
-          style={{ 
-            backgroundColor: '#F5F5F5',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1)'
-          }}
-        >
-          <CardContent className="p-6 h-full flex flex-col justify-center relative">
-            <button
-              onClick={handleBackFromEmail}
-              className="absolute top-4 left-4 w-8 h-8 rounded-full bg-gray-100/80 hover:bg-gray-200/80 backdrop-blur-sm transition-all duration-200 flex items-center justify-center group"
-            >
-              <ArrowLeft className="h-4 w-4 text-gray-600 group-hover:text-gray-800" />
-            </button>
-
-            <div className="text-center space-y-5 max-w-sm mx-auto">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
-                <Mail className="h-8 w-8 text-white" />
-              </div>
-
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-1">
-                  Receba materiais exclusivos
-                </h2>
-                <p className="text-gray-600 text-sm leading-relaxed px-2 pt-2">
-                  Digite seu email para receber conteúdos de empreendedorismo.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                  <div className="text-left">
-                    <Label htmlFor="email" className="text-xs font-medium text-gray-700">
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="seu@email.com"
-                      className="mt-1 h-10 text-center bg-white border-gray-200 focus:border-blue-300 focus:ring-blue-200 transition-all text-sm"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Button
-                      onClick={handleEmailSubmit}
-                      
-                      className="w-full h-10 bg-[#BAFF1B] text-black font-semibold hover:bg-[#A8E616] transition-colors flex items-center gap-2 text-sm"
-                    >
-                      <Mail className="h-3 w-3" />
-                      Quero receber
-                    </Button>
-
-                    <button
-                      onClick={handleSkipSave}
-                      className="text-[11px] text-gray-400 hover:text-gray-600 transition-colors opacity-70"
-                    >
-                      Não quero
-                    </button>
-                  </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <EmailCaptureModal
+        open={true}
+        onClose={() => setShowSaveLeadModal(false)}
+        onConfirm={async (leadEmail) => {
+          await fetch('/api/add-to-activecampaign', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: leadEmail })
+          })
+          await saveCalculation(leadEmail)
+        }}
+        title="Seja avisado quando lançar"
+        descriptionRich={(
+          <>
+            <p>Estamos finalizando a área de “Meus Cálculos”.</p>
+            <p>
+              Deixe seu email e enviaremos também <strong>materiais práticos e exclusivos</strong> sobre empreendedorismo.
+            </p>
+          </>
+        )}
+        confirmLabel="Quero ser avisado"
+        cancelLabel="Não quero"
+        Icon={History}
+        onSuccessAnother={() => {
+          setShowSaveLeadModal(false)
+        }}
+      />
     )
   }
+
+  // Removido: modal promocional de "Meus Cálculos"
 
   // Tela de resultados principal - Otimizada para 500px
   return (
@@ -395,8 +300,11 @@ function CalculationResultContent({
             variant="ghost"
             size="sm"
             onClick={() => {
-              if (onShowSavedCalculations) {
-                onShowSavedCalculations()
+              if (onBackToCalculator) {
+                onBackToCalculator()
+              } else if (onReset) {
+                // Fallback: se não houver callback dedicado, apenas resetar
+                onReset()
               }
             }}
             className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full hover:bg-gray-100 transition-colors"
@@ -510,15 +418,6 @@ function CalculationResultContent({
                     Refazer
                   </Button>
                 </div>
-                
-                <Button 
-                  onClick={() => onShowSavedCalculations && onShowSavedCalculations()}
-                  variant="outline"
-                  className="w-full h-9 border-blue-200 bg-blue-50/50 backdrop-blur-sm hover:bg-blue-100/80 hover:border-blue-300 transition-all flex items-center gap-2 text-sm text-blue-700"
-                >
-                  <History className="h-3 w-3" />
-                  Meus Cálculos
-                </Button>
               </div>
             )}
           </div>

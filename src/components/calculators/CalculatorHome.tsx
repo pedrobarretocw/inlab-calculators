@@ -40,10 +40,10 @@ const calculatorOptions: CalculatorOption[] = [
 export function CalculatorHome({ onSelectCalculator }: CalculatorHomeProps) {
   return (
     <div 
-      className="quiz-snake-border h-full max-h-[480px] flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-500 rounded-lg"
+      className="quiz-snake-border h-[480px] max-h-[480px] flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-500 rounded-2xl"
     >
       {/* Header */}
-      <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200/60">
+      <div className="flex-shrink-0 px-4 pt-4 pb-2 border-b border-gray-200/60">
         <h2 className="text-lg font-semibold text-gray-900 flex items-center justify-center gap-2">
           <Calculator className="h-5 w-5 text-purple-600" />
           Calculadoras InfinitePay

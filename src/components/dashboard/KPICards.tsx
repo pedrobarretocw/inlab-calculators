@@ -24,16 +24,14 @@ export async function KPICards() {
       .eq('event', 'calculate')
       .gte('created_at', thirtyDaysAgo.toISOString())
     
-    // Total conversions (users who signed up after calculation)
-    const { count: totalConversions } = await supabase
-      .from('events')
+    // Total leads (entries in leads table, all-time)
+    const { count: totalLeads } = await supabase
+      .from('leads')
       .select('*', { count: 'exact', head: true })
-      .eq('event', 'conversion')
-      .gte('created_at', thirtyDaysAgo.toISOString())
     
     // Calculate conversion rate
     const conversionRate = totalCalculations && totalCalculations > 0 
-      ? (totalConversions || 0) / totalCalculations * 100 
+      ? (totalLeads || 0) / totalCalculations * 100 
       : 0
     
     const kpis = [
@@ -48,14 +46,14 @@ export async function KPICards() {
         description: 'Last 30 days',
       },
       {
-        title: 'Conversions',
-        value: formatNumber(totalConversions || 0),
-        description: 'Users who signed up',
+        title: 'Leads',
+        value: formatNumber(totalLeads || 0),
+        description: 'Total leads (all time)',
       },
       {
         title: 'Conversion Rate',
         value: `${conversionRate.toFixed(1)}%`,
-        description: 'Calculations → Sign ups',
+        description: 'Calculations → Leads',
       },
     ]
     
