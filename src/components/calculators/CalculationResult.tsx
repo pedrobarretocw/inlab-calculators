@@ -197,6 +197,12 @@ function CalculationResultContent({
   const handleResetClick = async () => {
     setActionType('reset')
     
+    // Se salvamento está desabilitado, resetar direto
+    if (isSaveDisabled) {
+      onReset()
+      return
+    }
+    
     // Se já estiver logado, resetar direto sem salvar
     if (user && isLoaded) {
       onReset()
@@ -553,12 +559,23 @@ function CalculationResultContent({
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1)'
         }}
       >
-        {/* Header com seta voltar */}
-        <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200/60 relative">
+        {/* Header com seta voltar - mais compacto para Custo do Funcionário */}
+        <div className={`flex-shrink-0 px-4 border-b border-gray-200/60 relative ${
+          calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario'
+            ? 'py-1.5'
+            : 'py-2'
+        }`}>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onShowSavedCalculations && onShowSavedCalculations()}
+            onClick={() => {
+              // Se salvamento está desabilitado, volta direto para calculadora
+              if (isSaveDisabled) {
+                onReset()
+              } else {
+                onShowSavedCalculations && onShowSavedCalculations()
+              }
+            }}
             className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 rounded-full hover:bg-gray-100 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -575,8 +592,16 @@ function CalculationResultContent({
             <Home className="h-4 w-4 text-gray-600" />
           </Button>
           
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center justify-center gap-2">
-            <span className="text-xl">
+          <h2 className={`font-semibold text-gray-900 flex items-center justify-center gap-2 ${
+            calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario'
+              ? 'text-base'
+              : 'text-lg'
+          }`}>
+            <span className={
+              calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario'
+                ? 'text-lg'
+                : 'text-xl'
+            }>
               {isFromSavedCalculation && savedCalculationType 
                 ? getCalculationTypeIcon(savedCalculationType)
                 : '📊'
@@ -591,26 +616,38 @@ function CalculationResultContent({
 
         <CardContent className="p-2 flex-1 flex flex-col justify-between h-full">
           
-          {/* Results - Com scroll se necessário */}
-          <div className="space-y-1 flex-1 overflow-y-auto">
+          {/* Results - Com scroll se necessário e layout mais compacto para Custo do Funcionário */}
+          <div className={`${calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario' ? 'space-y-0.5' : 'space-y-1'} flex-1 overflow-y-auto`}>
             {results.map((result, index) => (
               <div 
                 key={index} 
-                className={`flex justify-between items-center p-2 rounded-lg backdrop-blur-sm transition-all border ${
+                className={`flex justify-between items-center rounded-lg backdrop-blur-sm transition-all border ${
                   result.highlight 
                     ? 'bg-gradient-to-r from-green-50/80 to-emerald-50/80 border-green-200/60 shadow-sm' 
                     : 'bg-white border-gray-200/50'
+                } ${
+                  calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario' 
+                    ? 'p-1.5' 
+                    : 'p-2'
                 }`}
               >
-                <span className={`font-medium text-sm ${
+                <span className={`font-medium ${
                   result.highlight ? 'text-green-800' : 'text-gray-700'
+                } ${
+                  calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario'
+                    ? 'text-xs'
+                    : 'text-sm'
                 }`}>
                   {result.label}
                 </span>
                 <span className={`font-semibold ${
                   result.highlight 
-                    ? 'text-green-600 text-base' 
-                    : 'text-gray-900 text-sm'
+                    ? 'text-green-600' 
+                    : 'text-gray-900'
+                } ${
+                  result.highlight
+                    ? (calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario' ? 'text-sm' : 'text-base')
+                    : (calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario' ? 'text-xs' : 'text-sm')
                 }`}>
                   {result.value}
                 </span>
@@ -618,13 +655,21 @@ function CalculationResultContent({
             ))}
             
             {/* Disclaimer no final dos resultados - SEM LINHA */}
-            <p className="text-xs text-gray-500 text-center pt-4">
+            <p className={`text-gray-500 text-center ${
+              calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario'
+                ? 'text-[10px] pt-2'
+                : 'text-xs pt-4'
+            }`}>
               Lembre-se: estes valores são estimativas para te orientar
             </p>
           </div>
           
-          {/* Actions - Fixo na parte inferior */}
-          <div className="pt-2 space-y-1.5 flex-shrink-0">
+          {/* Actions - Fixo na parte inferior - mais compacto para Custo do Funcionário */}
+          <div className={`flex-shrink-0 ${
+            calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario'
+              ? 'pt-1 space-y-1'
+              : 'pt-2 space-y-1.5'
+          }`}>
             {/* Buttons layout responsivo */}
             {!isFromSavedCalculation && (
               isSaveDisabled ? (
