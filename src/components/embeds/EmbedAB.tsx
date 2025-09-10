@@ -17,7 +17,6 @@ function EmbedABContent({ articleSlug }: EmbedABProps) {
   const [loading, setLoading] = useState(true)
   
   useEffect(() => {
-    // Check if we already have a variant in cookie
     const existingVariant = getVariant()
     
     if (existingVariant) {
@@ -25,7 +24,6 @@ function EmbedABContent({ articleSlug }: EmbedABProps) {
       setSelectedCalculator(existingVariant)
       setLoading(false)
     } else {
-      // Fetch variant from A/B API
       fetchVariant()
     }
   }, [])
@@ -37,20 +35,16 @@ function EmbedABContent({ articleSlug }: EmbedABProps) {
       if (response.ok) {
         const data = await response.json()
         const selectedVariant = data.variant
-        
-        // Save to cookie (TTL 7 days)
         setVariant(selectedVariant)
         setCurrentVariant(selectedVariant)
         setSelectedCalculator(selectedVariant)
       } else {
-        // Fallback to default calculator
         const fallback = 'ferias'
         setCurrentVariant(fallback)
         setSelectedCalculator(fallback)
       }
     } catch (error) {
       console.warn('Error fetching A/B variant:', error)
-      // Fallback to default calculator
       const fallback = 'ferias'
       setCurrentVariant(fallback)
       setSelectedCalculator(fallback)
@@ -59,13 +53,9 @@ function EmbedABContent({ articleSlug }: EmbedABProps) {
     }
   }
   
-  const handleCalculate = () => {
-    // Could trigger save flow here
-  }
+  const handleCalculate = () => {}
   
-  const handleStart = () => {
-    // User started calculation
-  }
+  const handleStart = () => {}
   
   if (loading) {
     return (

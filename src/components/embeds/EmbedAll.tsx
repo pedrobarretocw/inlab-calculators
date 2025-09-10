@@ -20,9 +20,6 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
   const [isLoading, setIsLoading] = useState(true)
   const [hasInitialized, setHasInitialized] = useState(false)
   
-  // Estado atual do componente
-  
-  // Inicialização apenas uma vez
   useEffect(() => {
     if (!hasInitialized) {
       if (initialCalculator) {
@@ -32,7 +29,6 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
           setHasInitialized(true)
         }, 800)
       } else {
-        // Se não tem initial, vai direto para home
         setTimeout(() => {
           setIsLoading(false)
           setHasInitialized(true)
@@ -41,7 +37,6 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
     }
   }, [initialCalculator, hasInitialized, selectCalculator])
   
-  // Loading state - mostrar skeleton
   if (isLoading) {
     return (
       <div className={`w-full max-w-lg mx-auto transition-opacity duration-300 ${fadeClass}`}>
@@ -52,13 +47,9 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
     )
   }
 
-  const handleCalculate = () => {
-    // Calculation completed
-  }
+  const handleCalculate = () => {}
   
-  const handleStart = () => {
-    // User started calculation
-  }
+  const handleStart = () => {}
   
   const handleCalculatorSelect = (calculatorId: string) => {
     setFadeClass('opacity-0')
@@ -72,7 +63,6 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
 
 
   
-  // Renderizar CalculatorHome
   if (showCalculatorHome) {
     return (
       <div className={`w-full max-w-lg mx-auto transition-opacity duration-300 ${fadeClass}`}>
@@ -83,7 +73,6 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
     )
   }
   
-  // Renderizar calculadora selecionada
   if (selectedCalculator) {
     return (
       <div className={`w-full max-w-lg mx-auto transition-opacity duration-300 ${fadeClass}`}>
@@ -122,7 +111,6 @@ function EmbedAllContent({ articleSlug, initialCalculator }: { articleSlug?: str
     )
   }
   
-  // Renderizar CalculatorHome por padrão (sem carousel)
   return (
     <div className={`w-full max-w-lg mx-auto transition-opacity duration-300 ${fadeClass}`}>
       <div className="h-[500px] max-h-[500px] flex items-center justify-center">

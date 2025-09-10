@@ -40,13 +40,11 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
   const [showSavedCalculations, setShowSavedCalculations] = useState(false)
   const [fadeClass, setFadeClass] = useState('opacity-100')
 
-  // Hooks
   const { showHome } = useCalculator()
   const calculationResult = useCalculationResult('custo-funcionario')
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationMessage, setValidationMessage] = useState('')
   
-  // Helper para converter valores de forma segura
   const convertToNumber = (value: unknown): number => {
     if (typeof value === 'number') return value
     if (typeof value === 'string') return parseFloat(value) || 0
@@ -64,7 +62,6 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
     },
   })
 
-  // Track view on mount
   useEffect(() => {
     track({
       event: 'view',
@@ -92,7 +89,6 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
     calculationResult.setNewCalculation(result)
     onCalculate?.(result)
     
-    // Toast de sucesso
     showCalculationSuccess('Custo do Funcionário')
     
     track({
@@ -105,13 +101,11 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
   }
 
   const onError = async () => {
-    // Forçar validação antes de verificar erros
     await form.trigger()
     
     const errors = form.formState.errors
     
     if (Object.keys(errors).length > 0) {
-      // Criar mensagem de erro
       const firstErrorField = Object.keys(errors)[0]
       const fieldNames: Record<string, string> = {
         salarioBase: 'Salário Base',
@@ -127,17 +121,14 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
       setValidationMessage(errorMessage)
       setShowValidationModal(true)
     } else {
-      // Se não há erros detectados, mostrar erro genérico
       setValidationMessage('Por favor, preencha todos os campos obrigatórios.')
       setShowValidationModal(true)
     }
   }
 
-  // handleReset removido (não utilizado)
 
 
 
-  // Mostrar cálculos salvos
   if (showSavedCalculations) {
     return (
       <TooltipProvider>
@@ -145,33 +136,25 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
           <CalculatorCardWrapper fadeClass={fadeClass}>
             <SavedCalculationsView 
               onBack={() => {
-                // Animação de fade-out
                 setFadeClass('opacity-0')
                 setTimeout(() => {
-                  // Resetar tudo e ir para tela de novo cálculo
                   calculationResult.reset()
                   form.reset()
                   setShowSavedCalculations(false)
-                  // Fade-in da tela principal
                   setFadeClass('opacity-100')
                 }, 150)
               }}
               onShowCalculatorHome={() => {
-                // Fecha meus calculos primeiro
                 setShowSavedCalculations(false)
-                // Depois mostra o home
                 showHome()
               }}
               onSelectCalculation={(calc) => {
-                // Preencher formulário com inputs salvos
                 const inputs = calc.inputs || {}
                 form.setValue('salarioBase', convertToNumber(inputs.salarioBase || 0))
                 form.setValue('valeRefeicao', convertToNumber(inputs.valeRefeicao || 0))
                 form.setValue('valeTransporte', convertToNumber(inputs.valeTransporte || 0))
                 form.setValue('planoSaude', convertToNumber(inputs.planoSaude || 0))
                 form.setValue('outrosBeneficios', convertToNumber(inputs.outrosBeneficios || 0))
-                
-                // Usar os outputs DIRETO do banco via CalculationParser
                 const parsedData = CalculationParser.parseByType(calc)
                 calculationResult.setSavedCalculation(parsedData, calc.calculator_slug)
                 setShowSavedCalculations(false)
@@ -186,7 +169,6 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
   return (
     <TooltipProvider>
       <div className="relative w-full max-w-lg">
-        {/* Erro de Validação FORA do Card para ficar por cima */}
         <InlineValidationError
           isVisible={showValidationModal}
           onClose={() => setShowValidationModal(false)}
@@ -196,11 +178,8 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
         />
         
         <CalculatorCardWrapper fadeClass={fadeClass}>
-          {/* Toast Containers */}
           <InlineToastContainer />
           <CalculatorErrorToastContainer />
-          
-          {/* Back Button removido */}
           
           <CardHeader className={`px-4 pb-2 pt-2`} style={{ backgroundColor: 'transparent' }}>
             <CardTitle className="text-base font-medium text-gray-900 flex items-center justify-center gap-2">
@@ -211,7 +190,6 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
               Calcule o custo total de um funcionário para a empresa
             </CardDescription>
             
-            {/* Botão Ver Cálculos Salvos abaixo da descrição */}
             <div className="flex justify-center mt-1">
               <button
                 onClick={() => {
@@ -228,7 +206,6 @@ export function CustoFuncionario({ onCalculate, onStart, variant = 'custo-funcio
           <CardContent className={`px-4 pb-3 pt-1`} style={{ backgroundColor: 'transparent' }}>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-3">
-                {/* Campo de Salário Base */}
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5">
                     <label className="text-xs font-medium text-gray-700">

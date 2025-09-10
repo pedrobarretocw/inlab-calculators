@@ -41,13 +41,11 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
   const [showSavedCalculations, setShowSavedCalculations] = useState(false)
   const [fadeClass, setFadeClass] = useState('opacity-100')
 
-  // Hooks
   const { showHome } = useCalculator()
   const calculationResult = useCalculationResult('13o-salario')
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationMessage, setValidationMessage] = useState('')
   
-  // Helper para converter valores de forma segura
   const convertToNumber = (value: unknown): number => {
     if (typeof value === 'number') return value
     if (typeof value === 'string') return parseFloat(value) || 0
@@ -62,7 +60,6 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
     },
   })
 
-  // Track view on mount
   useEffect(() => {
     track({
       event: 'view',
@@ -90,7 +87,6 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
     calculationResult.setNewCalculation(result)
     onCalculate?.(result)
     
-    // Toast de sucesso
     showCalculationSuccess('13º Salário')
     
     track({
@@ -103,13 +99,11 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
   }
 
   const onError = async () => {
-    // Forçar validação antes de verificar erros
     await form.trigger()
     
     const errors = form.formState.errors
     
     if (Object.keys(errors).length > 0) {
-      // Criar mensagem de erro
       const firstErrorField = Object.keys(errors)[0]
       const fieldNames: Record<string, string> = {
         salarioMensal: 'Salário Mensal',
@@ -120,7 +114,6 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
       setValidationMessage(`O campo "${fieldName}" deve ser preenchido corretamente.`)
       setShowValidationModal(true)
     } else {
-      // Se não há erros detectados, mostrar erro genérico
       setValidationMessage('Por favor, preencha todos os campos obrigatórios.')
       setShowValidationModal(true)
     }
@@ -134,7 +127,6 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
 
 
 
-  // Mostrar cálculos salvos
   if (showSavedCalculations) {
     return (
       <TooltipProvider>
@@ -143,30 +135,22 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
             <SavedCalculationsView
 
               onBack={() => {
-                // Animação de fade-out
                 setFadeClass('opacity-0')
                 setTimeout(() => {
-                  // Resetar tudo e ir para tela de novo cálculo
                   calculationResult.reset()
                   form.reset()
                   setShowSavedCalculations(false)
-                  // Fade-in da tela principal
                   setFadeClass('opacity-100')
                 }, 150)
               }}
               onShowCalculatorHome={() => {
-                // Fecha meus calculos primeiro
                 setShowSavedCalculations(false)
-                // Depois mostra o home
                 showHome()
               }}
               onSelectCalculation={(calc) => {
-                // Preencher formulário com inputs salvos
                 const inputs = calc.inputs || {}
                 form.setValue('salarioMensal', convertToNumber(inputs.salarioMensal || 0))
                 form.setValue('mesesTrabalhados', convertToNumber(inputs.mesesTrabalhados || 12))
-                
-                // Usar os outputs DIRETO do banco via CalculationParser
                 const parsedData = CalculationParser.parseByType(calc)
                 calculationResult.setSavedCalculation(parsedData, calc.calculator_slug)
                 setShowSavedCalculations(false)
@@ -181,7 +165,6 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
   return (
     <TooltipProvider>
       <div className="relative w-full max-w-lg">
-        {/* Erro de Validação FORA do Card para ficar por cima */}
         <InlineValidationError
           isVisible={showValidationModal}
           onClose={() => setShowValidationModal(false)}
@@ -191,7 +174,6 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
         />
         
         <CalculatorCardWrapper fadeClass={fadeClass}>
-          {/* Toast Containers */}
           <InlineToastContainer />
           <CalculatorErrorToastContainer />
           
@@ -278,7 +260,6 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
                 </div>
 
                 <div className="space-y-2 pt-9">
-                  {/* Botão Calcular centralizado */}
                   <div className="flex justify-center">
                     <Button 
                       type="submit" 
@@ -289,7 +270,6 @@ export function DecimoTerceiro({ onCalculate, onStart, variant = '13o-salario', 
                     </Button>
                   </div>
                   
-                  {/* Texto clicável para outras calculadoras */}
                   <div className="flex justify-center mt-4">
                     <button
                       type="button"

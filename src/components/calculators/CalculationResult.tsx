@@ -64,9 +64,6 @@ function CalculationResultContent({
   savedCalculationType
 }: CalculationResultProps) {
   
-  // LOG PARA DEBUG
-  // Logs removidos para limpar console
-  
   const { showHome, addSavedCalculation } = useCalculator()
   
   const [showEmailCapture, setShowEmailCapture] = useState(false)
@@ -295,7 +292,6 @@ function CalculationResultContent({
           }}
         >
           <CardContent className="p-6 h-full flex flex-col justify-center relative">
-            {/* Back Button */}
             <button
               onClick={() => setShowNameModal(false)}
               className="absolute top-4 left-4 w-8 h-8 rounded-full bg-gray-100/80 hover:bg-gray-200/80 backdrop-blur-sm transition-all duration-200 flex items-center justify-center group"
@@ -304,7 +300,6 @@ function CalculationResultContent({
             </button>
 
             <div className="flex flex-col items-center space-y-6">
-              {/* Title */}
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-1 text-center">
                   Salvar Cálculo
@@ -314,7 +309,6 @@ function CalculationResultContent({
                 </p>
               </div>
 
-              {/* Form */}
               <div className="w-full space-y-3">
                 <div className="text-left">
                   <Label htmlFor="name-input" className="text-xs font-medium text-gray-700">
@@ -373,7 +367,6 @@ function CalculationResultContent({
           }}
         >
           <CardContent className="p-6 h-full flex flex-col justify-center relative">
-            {/* Back Button */}
             <button
               onClick={handleBackFromEmail}
               className="absolute top-4 left-4 w-8 h-8 rounded-full bg-gray-100/80 hover:bg-gray-200/80 backdrop-blur-sm transition-all duration-200 flex items-center justify-center group"
@@ -382,12 +375,10 @@ function CalculationResultContent({
             </button>
 
             <div className="text-center space-y-5 max-w-sm mx-auto">
-              {/* Icon - Menor */}
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
                 {step === 'email' ? <Mail className="h-8 w-8 text-white" /> : <Sparkles className="h-8 w-8 text-white" />}
               </div>
 
-              {/* Title - Compacto */}
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-1">
                   {step === 'email' 
@@ -406,7 +397,6 @@ function CalculationResultContent({
                 </p>
               </div>
 
-              {/* Forms */}
               {step === 'email' ? (
                 <div className="space-y-3">
                   <div className="text-left">
@@ -531,7 +521,6 @@ function CalculationResultContent({
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1)'
         }}
       >
-        {/* Header com seta voltar - mais compacto para Custo do Funcionário */}
         <div className={`flex-shrink-0 px-4 border-b border-gray-200/60 relative ${
           calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario'
             ? 'py-1.5'
@@ -585,7 +574,6 @@ function CalculationResultContent({
 
         <CardContent className="p-2 flex-1 flex flex-col justify-between h-full">
           
-          {/* Results - Com scroll se necessário e layout mais compacto para Custo do Funcionário */}
           <div className={`${calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario' ? 'space-y-0.5' : 'space-y-1'} flex-1 overflow-y-auto`}>
             {results.map((result, index) => (
               <div 
@@ -623,7 +611,6 @@ function CalculationResultContent({
               </div>
             ))}
             
-            {/* Disclaimer no final dos resultados - SEM LINHA */}
             <p className={`text-gray-500 text-center ${
               calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario'
                 ? 'text-[10px] pt-2'
@@ -633,13 +620,11 @@ function CalculationResultContent({
             </p>
           </div>
           
-          {/* Actions - Fixo na parte inferior - mais compacto para Custo do Funcionário */}
           <div className={`flex-shrink-0 ${
             calculatorType === 'custo-funcionario' || savedCalculationType === 'custo-funcionario'
               ? 'pt-1 space-y-1'
               : 'pt-2 space-y-1.5'
           }`}>
-            {/* Buttons layout responsivo */}
             {!isFromSavedCalculation && (
               <div className="space-y-2">
                 <div className="grid grid-cols-2 gap-2">

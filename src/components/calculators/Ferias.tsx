@@ -44,13 +44,11 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug }
   const [showSavedCalculations, setShowSavedCalculations] = useState(false)
   const [fadeClass, setFadeClass] = useState('opacity-100')
 
-  // Hooks
   const { showHome } = useCalculator()
   const calculationResult = useCalculationResult('ferias')
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationMessage, setValidationMessage] = useState('')
   
-  // Helper para converter valores de forma segura
   const convertToNumber = (value: unknown): number => {
     if (typeof value === 'number') return value
     if (typeof value === 'string') return parseFloat(value) || 0
@@ -68,7 +66,6 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug }
     },
   })
 
-  // Track view on mount
   useEffect(() => {
     track({
       event: 'view',
@@ -96,7 +93,6 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug }
     calculationResult.setNewCalculation(result)
     onCalculate?.(result)
     
-    // Toast de sucesso
     showCalculationSuccess('Férias')
     
     track({
@@ -109,13 +105,11 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug }
   }
 
   const onError = async () => {
-    // Forçar validação antes de verificar erros
     await form.trigger()
     
     const errors = form.formState.errors
     
     if (Object.keys(errors).length > 0) {
-      // Criar mensagem de erro
       const firstErrorField = Object.keys(errors)[0]
       const fieldNames: Record<string, string> = {
         salarioMensal: 'Salário Mensal',
@@ -129,7 +123,6 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug }
       setValidationMessage(errorMessage)
       setShowValidationModal(true)
     } else {
-      // Se não há erros detectados, mostrar erro genérico
       setValidationMessage('Por favor, preencha todos os campos obrigatórios.')
       setShowValidationModal(true)
     }
@@ -139,7 +132,6 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug }
 
 
 
-  // Mostrar cálculos salvos
   if (showSavedCalculations) {
     return (
       <TooltipProvider>
@@ -148,30 +140,22 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug }
             <SavedCalculationsView 
 
               onBack={() => {
-                // Animação de fade-out
                 setFadeClass('opacity-0')
                 setTimeout(() => {
-                  // Resetar tudo e ir para tela de novo cálculo
                   calculationResult.reset()
                   form.reset()
                   setShowSavedCalculations(false)
-                  // Fade-in da tela principal
                   setFadeClass('opacity-100')
                 }, 150)
               }}
               onShowCalculatorHome={() => {
-                // Fecha meus calculos primeiro
                 setShowSavedCalculations(false)
               }}
               onSelectCalculation={(calc) => {
-                
-                // Preencher formulário com inputs salvos
                 const inputs = calc.inputs || {}
                 form.setValue('salarioMensal', convertToNumber(inputs.salarioMensal || 0))
                 form.setValue('mesesTrabalhados', convertToNumber(inputs.mesesTrabalhados || 12))
                 form.setValue('diasFerias', convertToNumber(inputs.diasFerias || 30))
-                
-                // Usar os outputs DIRETO do banco via CalculationParser
                 const parsedData = CalculationParser.parseByType(calc)
                 calculationResult.setSavedCalculation(parsedData, calc.calculator_slug)
                 setShowSavedCalculations(false)
@@ -186,7 +170,6 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug }
   return (
     <TooltipProvider>
       <div className="relative w-full max-w-lg">
-        {/* Erro de Validação FORA do Card para ficar por cima */}
         <InlineValidationError
           isVisible={showValidationModal}
           onClose={() => setShowValidationModal(false)}
@@ -196,7 +179,6 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug }
         />
         
         <CalculatorCardWrapper fadeClass={fadeClass}>
-          {/* Toast Containers */}
           <InlineToastContainer />
           <CalculatorErrorToastContainer />
           
@@ -325,7 +307,6 @@ export function Ferias({ onCalculate, onStart, variant = 'ferias', articleSlug }
                     </Button>
                   </div>
                   
-                  {/* Texto clicável para outras calculadoras */}
                   <div className="flex justify-center mt-3">
                     <button
                       type="button"
