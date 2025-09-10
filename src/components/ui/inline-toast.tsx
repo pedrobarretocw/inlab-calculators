@@ -25,31 +25,26 @@ export function InlineToast({ toast, onDismiss }: InlineToastProps) {
   const [isVisible, setIsVisible] = React.useState(false)
   const [isExiting, setIsExiting] = React.useState(false)
 
+  const handleDismiss = React.useCallback(() => {
+    setIsExiting(true)
+    setTimeout(() => {
+      onDismiss(toast.id)
+    }, 200)
+  }, [onDismiss, toast.id])
+
   React.useEffect(() => {
-    // Anima entrada
     const timer = setTimeout(() => setIsVisible(true), 10)
-    
-    // Auto dismiss
     if (toast.duration !== 0) {
       const dismissTimer = setTimeout(() => {
         handleDismiss()
       }, toast.duration || 4000)
-      
       return () => {
         clearTimeout(timer)
         clearTimeout(dismissTimer)
       }
     }
-    
     return () => clearTimeout(timer)
-  }, [toast.duration])
-
-  const handleDismiss = () => {
-    setIsExiting(true)
-    setTimeout(() => {
-      onDismiss(toast.id)
-    }, 200)
-  }
+  }, [toast.duration, handleDismiss])
 
   const getIcon = () => {
     switch (toast.type) {
@@ -82,12 +77,10 @@ export function InlineToast({ toast, onDismiss }: InlineToastProps) {
         isExiting && "opacity-0 -translate-y-1"
       )}
     >
-      {/* Ícone */}
       <div className="flex-shrink-0 mt-0.5">
         {getIcon()}
       </div>
       
-      {/* Conteúdo */}
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium">
           {toast.title}
@@ -98,7 +91,6 @@ export function InlineToast({ toast, onDismiss }: InlineToastProps) {
           </div>
         )}
         
-        {/* Ação */}
         {toast.action && (
           <button
             onClick={toast.action.onClick}
@@ -109,7 +101,6 @@ export function InlineToast({ toast, onDismiss }: InlineToastProps) {
         )}
       </div>
       
-      {/* Botão fechar */}
       <button
         onClick={handleDismiss}
         className="flex-shrink-0 ml-2 opacity-70 hover:opacity-100 transition-opacity"

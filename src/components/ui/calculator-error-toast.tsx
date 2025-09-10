@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import Image from 'next/image'
 import { X, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -22,31 +23,26 @@ export function CalculatorErrorToast({ toast, onDismiss }: CalculatorErrorToastP
   const [isVisible, setIsVisible] = React.useState(false)
   const [isExiting, setIsExiting] = React.useState(false)
 
+  const handleDismiss = React.useCallback(() => {
+    setIsExiting(true)
+    setTimeout(() => {
+      onDismiss(toast.id)
+    }, 300)
+  }, [onDismiss, toast.id])
+
   React.useEffect(() => {
-    // Anima entrada
     const timer = setTimeout(() => setIsVisible(true), 10)
-    
-    // Auto dismiss
     if (toast.duration !== 0) {
       const dismissTimer = setTimeout(() => {
         handleDismiss()
       }, toast.duration || 5000)
-      
       return () => {
         clearTimeout(timer)
         clearTimeout(dismissTimer)
       }
     }
-    
     return () => clearTimeout(timer)
-  }, [toast.duration])
-
-  const handleDismiss = () => {
-    setIsExiting(true)
-    setTimeout(() => {
-      onDismiss(toast.id)
-    }, 300)
-  }
+  }, [toast.duration, handleDismiss])
 
   return (
     <div
@@ -56,7 +52,6 @@ export function CalculatorErrorToast({ toast, onDismiss }: CalculatorErrorToastP
         isExiting && "opacity-0 -translate-y-2 scale-95"
       )}
     >
-      {/* Header com ícone e botão fechar */}
       <div className="flex items-start justify-between p-4 pb-3">
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 mt-0.5">
@@ -85,15 +80,16 @@ export function CalculatorErrorToast({ toast, onDismiss }: CalculatorErrorToastP
         </button>
       </div>
 
-      {/* Imagem se habilitada */}
       {toast.showImage && (
         <div className="px-4 pb-4">
-          <div className="w-full h-32 bg-gradient-to-br from-red-50 to-orange-50 rounded-lg border border-red-100 flex items-center justify-center">
+          <div className="w-full h-32 bg-gradient-to-br from-red-50 to-orange-50 rounded-lg border border-red-100 flex items-center justify-center relative">
             {toast.imageUrl ? (
-              <img 
-                src={toast.imageUrl} 
-                alt="Erro na validação" 
-                className="max-w-full max-h-full object-contain rounded"
+              <Image 
+                src={toast.imageUrl}
+                alt="Erro na validação"
+                fill
+                className="object-contain rounded"
+                sizes="(max-width: 768px) 100vw, 500px"
               />
             ) : (
               <div className="text-center text-red-400">
